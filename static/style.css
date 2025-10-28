@@ -1,0 +1,347 @@
+/* body {
+    font-family: Arial, sans-serif;
+    margin: 0px;
+    padding: 0px;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+header {
+    background-image: linear-gradient(to right, rgb(48, 23, 198), rgb(211, 9, 49));
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+    font-family: Arial, Verdana, sans-serif;
+}
+
+button {
+    background-color: #d65f1a; 
+    color: white;
+    width: 40%;
+    height: 50px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px
+}
+
+label{
+    color: black;
+    margin: 10px;
+}
+textarea{
+    align-self: center;
+    height: 130px;
+    width: 50%;
+    resize: none;
+    display: inline-block;
+    border: none;
+    border-radius: 16px;
+    padding: 10px;
+    margin: 10px;
+} */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    min-height: 100vh;
+    padding: 20px;
+}
+dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.grid-table {
+  border-collapse: separate;
+  border-spacing: 25px 15px;
+  width: 100%;
+  table-layout: fixed;
+}
+.grid-table th,
+.grid-table td {
+    text-align: center;
+    width: 230px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.tournament-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.tournament-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.input-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.player-input {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.player-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #4CAF50;
+}
+
+.button-group {
+    display: grid;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #2196F3, #0b7dda);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.tournament-container {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 20px 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.tournament-grid {
+    display: flex;
+    min-width: 1200px;
+    gap: 20px;
+    padding: 20px;
+}
+
+.round {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    min-width: 280px;
+}
+
+.round-header {
+    text-align: center;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.player-box {
+    background: rgba(255,255,255,0.95);
+    color: #333;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    height: 70px;
+    /* min-height: 80px; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.player-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    border-color: #4CAF50;
+}
+
+.player-name {
+    align-self: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.player-name-winner {
+    align-self: center;
+    font-weight: bold;
+    color: #4CAF50;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.player-info {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.round-1-8 .player-box {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+}
+
+.round-1-4 .player-box {
+    background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+}
+
+.round-1-2 .player-box {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+}
+
+.round-final .player-box {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+}
+
+.champion-box {
+    background: linear-gradient(135deg, #fff9c4, #f57f17) !important;
+    border: 3px solid #ff9800 !important;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .tournament-header h1 {
+        font-size: 2rem;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .player-input {
+        min-width: 100%;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .tournament-grid {
+        gap: 15px;
+        padding: 10px;
+    }
+
+    .round {
+        min-width: 250px;
+        gap: 30px;
+    }
+
+    .player-box {
+        padding: 12px;
+        min-height: 70px;
+    }
+
+    .player-name {
+        font-size: 1rem;
+    }
+
+    .player-info {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tournament-grid {
+        gap: 10px;
+    }
+
+    .round {
+        min-width: 220px;
+        gap: 25px;
+    }
+
+    .player-box {
+        padding: 10px;
+        min-height: 60px;
+    }
+
+    .round-header {
+        font-size: 1rem;
+        padding: 8px;
+    }
+}
+
+/* Стили для скроллбара */
+.tournament-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tournament-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+.tournament-container::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+}
+
+.tournament-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+}
