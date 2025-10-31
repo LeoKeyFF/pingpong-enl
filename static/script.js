@@ -1,21 +1,33 @@
 let player1
 let player2
 let round
+let grid
 
 let winner
+let winner_bottom
 
-let get_from_top_grid = {
-        'rows': Array(), 
-        'rounds_players': Array(),
-        'rounds': Array(),
-        'round_indexes': Array(),
-        'all_rounds': String
-}
+// let get_from_top_grid = {
+//         'rows': Array(), 
+//         'rounds_players': Array(),
+//         'rounds': Array(),
+//         'round_indexes': Array(),
+//         'all_rounds': String
+// }
 
-function openChooseWinner(r, p1, p2){
+// let get_from_bottom_grid = {
+//         'rows': Array(), 
+//         'rounds_players': Array(),
+//         'rounds': Array(),
+//         'round_indexes': Array(),
+//         'all_rounds': String
+// }
+
+function openChooseWinner(r, p1, p2, grid_){
     player1 = p1;
     player2 = p2;
     round = r;
+    grid = grid_;
+
     const dialog = document.getElementById("chooseWinner");
 
     const contentElementP1 = document.getElementById('dialogPlayer1');
@@ -34,7 +46,6 @@ function openChooseWinner(r, p1, p2){
 }
 
 function closeChooseWinner(w){
-
     const dialog = document.getElementById("chooseWinner");
 
     dialog.close();
@@ -44,15 +55,13 @@ function closeChooseWinner(w){
         winner = player2;
 
     sendWinners()
-    
 }
 
 async function sendWinners(){
-
-
     const dataToSend = { 
         winner: winner,
-        round: round
+        round: round,
+        grid: grid
     };
 
     $.ajax({
@@ -72,43 +81,53 @@ async function sendWinners(){
         }
     });
 
-    // try {
-    //     const response = await fetch('/send_winner', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify(dataToSend)
-    //     });
-
-    //     if (!response.ok) {
-    //         throw new Error(`HTTP error! status: ${response.status}`);
-    //     }
-
-    //     const result = await response.json();
-    //     document.getElementById('response').innerText = result.message;
-    // } catch (error) {
-    //     console.error('Error calling Flask function:', error);
-    //     document.getElementById('response').innerText = 'Error: ' + error.message;
-    // }
-    
+    $.ajax({
+        type: "POST",
+        url: '/set_bottom_grid',
+        contentType: 'application/json; charset=utf-8',
+        success: function (response, status, jqXHR) {
+            updateDynamicContent()
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            // Error handling
+        },
+        complete: function (jqXHR, textStatus) {
+            updateDynamicContent()
+        }
+    });
 }
 
-function createTopGridTable(){
-
+function createGridTable(id, data, div_id, grid_){
     const table = $('<table>', {
-        id: 'topGridTable',
+        id: id,
         class: 'grid-table'
     });
     const thead = $('<thead>');
     const headerRow = $('<tr>');
 
-    for (const round of get_from_top_grid.rounds){
-        th = $('<th>');
-        divHead =  $('<div>',{
-            class: 'round-header',
-            text: "1/" + round + " Финала"
-        });
+    for (const round of data.rounds){
+        if (grid_ == 0){
+            th = $('<th>');
+            if (round != 1){
+                divHead =  $('<div>',{
+                    class: 'round-header',
+                    text: "1/" + round + " Финала"
+                });
+            } else {
+                divHead =  $('<div>',{
+                    class: 'round-header',
+                    text: "Финал"
+                });
+            }
+        } else{
+            th = $('<th>');
+            divHead = $('<div>', {
+                class: 'round-header',
+                text: "Раунд " + round
+            });
+        }
+
+
         th.append(divHead)
         headerRow.append(th);
     };
@@ -116,13 +135,26 @@ function createTopGridTable(){
     table.append(thead);
 
     const tbody = $('<tbody>');
-    for (let round of get_from_top_grid.round_indexes){
+    for (let round of data.round_indexes){
         const tr = $('<tr>');
-        for (let row of get_from_top_grid.rows){
+        for (let row of data.rows){
             if (row[4] == round){
-                td = $('<td>', {
-                    rowspan: get_from_top_grid.all_rounds/row[0]
-                });
+                if (grid_ == 0){
+                    td = $('<td>', {
+                        rowspan: data.all_rounds/row[0]
+                    });
+                } else {
+                    players_in_column = 0
+                    for (let pl of data.rows){
+                        if (pl[0] == row[0]){
+                            players_in_column += 1
+                        }
+                    }
+                    td = $('<td>', {
+                        rowspan: data.all_rounds/players_in_column
+                    });                    
+                }
+
                 if (row[3] == ''){
                     if (row[1] == '' || row[2] == ''){
                         divPlayerBox = $('<div>',{
@@ -132,7 +164,7 @@ function createTopGridTable(){
                     else{
                         divPlayerBox = $('<div>',{
                             class: 'player-box'
-                        }).on("click", function() {openChooseWinner(row[0] ,row[1], row[2])}); 
+                        }).on("click", function() {openChooseWinner(row[0] ,row[1], row[2], grid_)}); 
                     }
                     divRow1 = $('<div>',{
                         class: 'player-name',
@@ -183,22 +215,34 @@ function createTopGridTable(){
         tbody.append(tr);
     }  
     table.append(tbody);
-    $('#topgrid').append(table);
+    $(div_id).append(table);
 }
 
 function updateDynamicContent() {
     $.ajax({
-        url: '/get_data',  // Flask route URL
+        url: '/get_data_top',  // Flask route URL
         method: 'GET',
         dataType: 'json',
         success: function(data) {
-            get_from_top_grid = data;
-            $('#dynamic-content').text('Value: ' + get_from_top_grid.rounds);
-
+            // get_from_top_grid = data;
             $('#topGridTable').remove();
-            createTopGridTable()
+            createGridTable(id='topGridTable', data = data, div_id = '#topgrid', grid_ = '0');
         },
         error: function() {
+            console.error('Error fetching data.');
+        }
+    });
+
+    $.ajax({
+        url: '/get_data_bottom',  // Flask route URL
+        method: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            // get_from_bottom_grid = data;
+            $('#bottomGridTable').remove();
+            createGridTable(id='bottomGridTable', data = data, div_id = '#bottomgrid', grid_ = '1');
+        },
+        error: function () {
             console.error('Error fetching data.');
         }
     });

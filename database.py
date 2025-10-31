@@ -1,5 +1,6 @@
 import sqlite3
 import random
+import math
 from datetime import datetime
 
 def init_db():
@@ -53,7 +54,6 @@ def set_top_grid():
               break   
          
     first_round = first_round / 2
-    print(first_round)
 
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS TopGrid ( BracketID INTEGER PRIMARY KEY," 
@@ -118,8 +118,7 @@ def set_top_grid():
             bracket_id_win = cursor.execute(
                 f"SELECT BracketID FROM TopGrid WHERE Player1ID = {players_orign.index(players[i]) + 1}"
                 ).fetchall()[0][0]
-            print(bracket_id_win, int(players_orign.index(players[i]) + 1))
-            set_winner_logic(bracket_id_win , int(players_orign.index(players[i]) + 1), connection, cursor)
+            set_winner_logic(bracket_id_win , int(players_orign.index(players[i]) + 1), connection, cursor, 0)
 
 
     m = 0
@@ -160,44 +159,190 @@ def get_from_top_grid():
     connection.close()
     return rounds, rounds_players
 
+def get_from_bottom_grid():
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+    rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM BottomGrid").fetchall()))
+    rounds = []
+    for r in rounds_:
+        if r[0] not in rounds:
+            rounds.append(r[0])
+    rounds.sort(reverse= False)
+    rounds_players = cursor.execute(
+         f"SELECT r.RoundNumber, COALESCE(p1.Name, ''),COALESCE(p2.Name, ''), COALESCE(w.Name, '') "
+         "FROM BottomGrid r "
+         "LEFT JOIN Players p1 ON r.Player1ID = p1.PlayerID "
+         "LEFT JOIN Players p2 ON r.Player2ID = p2.PlayerID "
+        "LEFT JOIN Players w ON r.Winner = w.PlayerID "
+         "ORDER BY r.RoundNumber"
+    ).fetchall()
+    connection.close()
+    return rounds, rounds_players
+
 
 def set_winner(bracket_id , winner):
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
 
 
-    set_winner_logic(bracket_id , winner, connection, cursor)
+    set_winner_logic(bracket_id , winner, connection, cursor, 0)
 
     connection.commit()
     connection.close()
 
-def set_winner_logic(bracket_id , winner, connection, cursor):
-    cursor.execute(
-        f"UPDATE TopGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
-    )
-    next_bracket_id = cursor.execute(
-        f"SELECT NextBracketID FROM TopGrid WHERE BracketID = {bracket_id}"
-    ).fetchall()[0][0]
-    print(next_bracket_id)
-    if (next_bracket_id  != None):
+def set_winner_logic(bracket_id , winner, connection, cursor, grid):
+    if grid == 0:
         cursor.execute(
-        f"UPDATE TopGrid SET Player1ID = CASE WHEN BracketID = {next_bracket_id} AND (Player1ID IS NULL OR Player1ID = '') THEN {winner} ELSE Player1ID END, Player2ID = CASE WHEN Player1ID IS NOT NULL AND Player1ID != '' AND (Player2ID IS NULL OR Player2ID = '') AND BracketID = {next_bracket_id} THEN {winner} ELSE Player2ID END"
+            f"UPDATE TopGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
         )
+        next_bracket_id = cursor.execute(
+            f"SELECT NextBracketID FROM TopGrid WHERE BracketID = {bracket_id}"
+        ).fetchall()[0][0]
+        if (next_bracket_id  != None):
+            cursor.execute(
+            f"UPDATE TopGrid SET Player1ID = CASE WHEN BracketID = {next_bracket_id} AND (Player1ID IS NULL OR Player1ID = '') THEN {winner} ELSE Player1ID END, Player2ID = CASE WHEN Player1ID IS NOT NULL AND Player1ID != '' AND (Player2ID IS NULL OR Player2ID = '') AND BracketID = {next_bracket_id} THEN {winner} ELSE Player2ID END"
+            )
+    else:
+        cursor.execute(
+        f"UPDATE BottomGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
+        )
+    
 
-def send_winner(winner, round):
+def send_winner(winner, round, grid):
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
     winner_id = cursor.execute(
         f"SELECT PlayerID FROM Players WHERE Players.Name = '{winner}'"
     ).fetchall()[0][0]
-    bracket_id = cursor.execute(
-        f"SELECT BracketID FROM TopGrid WHERE RoundNumber = {round} AND (Player1ID = {winner_id} OR Player2ID = {winner_id})"
-    ).fetchall()[0][0]
+    bracket_id = 0
+    if grid == 0:
+        bracket_id = cursor.execute(
+            f"SELECT BracketID FROM TopGrid WHERE RoundNumber = {int(round)} AND (Player1ID = {winner_id} OR Player2ID = {winner_id})"
+        ).fetchall()[0][0]
+    else:
+        bracket_id = cursor.execute(
+        f"SELECT BracketID FROM BottomGrid WHERE RoundNumber = {round} AND (Player1ID = {winner_id} OR Player2ID = {winner_id})"
+        ).fetchall()[0][0]
     # cursor.execute(
     #     f"UPDATE TopGrid SET Winner = (SELECT PlayerID FROM Players WHERE Players.Name = '{winner}') WHERE RoundNumber = {round}"
     # )
 
-    set_winner_logic(bracket_id , winner_id, connection, cursor)
+    set_winner_logic(bracket_id , winner_id, connection, cursor, grid)
+
+    connection.commit()
+    connection.close()
+
+def set_bottom_grid():
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS BottomGrid ( BracketID INTEGER PRIMARY KEY," 
+          "RoundNumber REAL, Player1ID INT, Player2ID INT, Winner INT,"
+          " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+    )
+    rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM TopGrid").fetchall()))
+    rounds = []
+    for r in rounds_:
+        if r[0] not in rounds:
+            rounds.append(r[0])
+    rounds.sort(reverse = True)
+    bottom_round = 0
+    for round in rounds:
+        bottom_round = rounds.index(round) + 1
+        winners = cursor.execute(
+        f"SELECT Winner FROM TopGrid WHERE RoundNumber = {round}"
+        ).fetchall()
+        set_grid = True
+        for winner in winners:
+            if winner[0] == None:
+                set_grid = False
+        
+        is_full = cursor.execute(
+        f"SELECT COUNT(*) FROM BottomGrid WHERE RoundNumber = {bottom_round}"
+        ).fetchall()[0][0]
+        if is_full != 0:
+            set_grid = False
+        
+
+        bottom_winners_before = cursor.execute(
+        f"SELECT Winner FROM BottomGrid WHERE RoundNumber = {bottom_round - 1}"
+        ).fetchall()
+        for a in bottom_winners_before:
+            if a[0] == None:
+               set_grid = False
+        if len(bottom_winners_before) == 0 and bottom_round != 1:
+            set_grid = False
+
+        losers = cursor.execute(
+        f"SELECT Player1ID FROM TopGrid WHERE Player1ID != Winner AND RoundNumber = {round} UNION ALL SELECT Player2ID FROM TopGrid WHERE Player2ID != Winner AND RoundNumber = {round}"
+        ).fetchall()
+
+        pre_round = cursor.execute(
+        f"SELECT COUNT(*) FROM BottomGrid WHERE RoundNumber = {bottom_round - 0.5}"
+        ).fetchall()[0][0]
+
+
+        if pre_round != 0:
+            pre_winners = cursor.execute(
+            f"SELECT Winner FROM BottomGrid WHERE RoundNumber = {bottom_round - 0.5}"
+            ).fetchall()
+            for a in pre_winners:
+                if a[0] == None and len(pre_winners) == 0:
+                     set_grid = False
+                     break
+                else:
+                    set_grid = True
+
+
+            is_full = cursor.execute(
+            f"SELECT COUNT(*) FROM BottomGrid WHERE RoundNumber = {bottom_round}"
+            ).fetchall()[0][0]
+            if is_full != 0:
+                set_grid = False
+
+
+            pre_players = cursor.execute(
+            f"SELECT Player1ID FROM BottomGrid WHERE RoundNumber = {bottom_round - 0.5} "
+            ).fetchall() + cursor.execute(
+            f"SELECT Player2ID FROM BottomGrid WHERE RoundNumber = {bottom_round - 0.5} "
+            ).fetchall()
+
+            for player in pre_players:
+                if player in losers:
+                    losers.remove(player)
+            losers += pre_winners
+            bottom_winners_before = pre_winners
+        else:
+            losers += bottom_winners_before
+        
+        if (len(bottom_winners_before) > len(winners)) or (len(losers) % 2 != 0 and (len(losers) != 1)):
+            bottom_round = bottom_round - 0.5
+            if len(bottom_winners_before) > len(winners):
+                losers = bottom_winners_before[:(len(bottom_winners_before) -  len(winners) + 2)]
+            else:
+                random.shuffle(losers)
+                losers = losers[:2]
+        
+        print("роунд: ", round, "losers: ", losers, "bottom_winners_before: ", bottom_winners_before)
+        
+        random.shuffle(losers)
+        if set_grid:
+            for i in range (0, math.ceil(len(losers)/2)):
+                if math.ceil(len(losers)/2) + i < len(losers):
+                    cursor.execute(
+                    f"INSERT INTO BottomGrid (RoundNumber, Player1ID, Player2ID) VALUES ({bottom_round}, {losers[i][0]}, {losers[math.ceil(len(losers)/2) + i][0]})"
+                    )  
+                else:
+                    cursor.execute(
+                    f"INSERT INTO BottomGrid (RoundNumber, Player1ID) VALUES ({bottom_round}, {losers[i][0]})"
+                    ) 
+                    bracket_id_win = cursor.execute(
+                    f"SELECT BracketID FROM BottomGrid WHERE Player1ID = {losers[i][0]}"
+                    ).fetchall()[0][0]
+                    set_winner_logic(bracket_id_win , losers[i][0], connection, cursor, 1)
+        
 
     connection.commit()
     connection.close()
@@ -210,10 +355,8 @@ def cleen():
 
     cursor.execute(f"DELETE FROM Players")
     cursor.execute(f"DELETE FROM TopGrid")
+    cursor.execute(f"DELETE FROM BottomGrid")
 
     connection.commit()
     connection.close()
 
-
-
-    

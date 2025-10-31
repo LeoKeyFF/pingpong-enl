@@ -71,9 +71,10 @@ dialog {
 .grid-table {
   border-collapse: separate;
   border-spacing: 25px 15px;
-  width: 100%;
+  width: 230px;
   table-layout: fixed;
 }
+
 .grid-table th,
 .grid-table td {
     text-align: center;

@@ -18,16 +18,13 @@ def add_players():
     
     return redirect(url_for('home'))
 
-@app.route("/get_players", methods = ['POST'])
-def get_players():
-    players = database.get_players()
-    return render_template("main.html", players = players)
 
-@app.route("/get_data", methods = ['GET'])
-def get_data():
-    data = random.random()
+@app.route("/get_data_top", methods = ['GET'])
+def get_data_top():
     rounds, rounds_players = database.get_from_top_grid()
-    all_rounds = int(max(rounds))
+    all_rounds = 0
+    if len(rounds) > 0:
+        all_rounds = int(max(rounds))
     round_indexes = list(range(0, all_rounds))
     rows = []
     for round in rounds:
@@ -46,6 +43,45 @@ def get_data():
     }
     return jsonify(data)
 
+@app.route("/get_data_bottom", methods = ['GET'])
+def get_data_bottom():
+    rounds, rounds_players = database.get_from_bottom_grid()
+    max_players = 0
+    
+    for round in rounds:
+        max_for_round = 0
+        for pl in rounds_players:
+            if (pl[0] == round):
+                max_for_round += 1
+        if max_for_round >= max_players:
+            max_players = max_for_round
+
+    # if len(rounds) > 0:
+    #     all_rounds = int(max(rounds))
+    round_indexes = list(range(0, max_players))
+    rows = []
+    for round in rounds:
+        max_players_in_round = 0
+        for pl in rounds_players:
+            if (pl[0] == round):
+                max_players_in_round += 1
+        row_index = 0
+        for round_pl in rounds_players:
+            if (round_pl[0] == round):
+                round_pl_new = round_pl + (int(row_index), )
+                rows.append(round_pl_new)
+                row_index += max_players/max_players_in_round
+
+    data = {
+        'rows': rows, 
+        'rounds_players': rounds_players,
+        'rounds': rounds,
+        'round_indexes': round_indexes,
+        'all_rounds': max_players
+    }
+    return jsonify(data)
+
+
 @app.route("/cleen", methods = ['POST'])
 def cleen():
     database.cleen()
@@ -54,43 +90,21 @@ def cleen():
 @app.route("/set_top_grid", methods = ['POST'])
 def set_top_grid():
     database.set_top_grid()
-    # rounds, rounds_players = database.get_from_top_grid()
     return redirect(url_for('home'))
 
-@app.route("/get_from_top_grid", methods = ['GET'])
-def get_from_top_grid():
-    rounds, rounds_players = database.get_from_top_grid()
-    all_rounds = int(max(rounds))
-    round_indexes = range(0, all_rounds)
-    print(rounds_players)
-    rows = []
-    for round in rounds:
-        row_index = 0
-        for round_pl in rounds_players:
-            if (round_pl[0] == round):
-                round_pl_new = round_pl + (int(row_index), )
-                rows.append(round_pl_new)
-                row_index += all_rounds/round
-    print(rows)
-    return render_template("main.html", rounds_players = rounds_players, rounds = rounds, 
-                           rows = rows, round_indexes = round_indexes, all_rounds = all_rounds)
-
-
-@app.route("/set_winner", methods = ['POST'])
-def set_winner():
-    winner = 1
-    bracket_id = 1
-    database.set_winner(bracket_id, winner)
-    return redirect(url_for('home'))
 
 @app.route("/send_winner", methods = ['POST'])
 def send_winner():
     data = request.get_json()
     winner = data.get('winner', '')
-    round = int(data.get('round', ''))
+    round = float(data.get('round', ''))
+    grid = int(data.get('grid', ''))
+    database.send_winner(winner, round, grid)
+    return redirect(url_for('home'))
 
-    print(round)
-    database.send_winner(winner, round)
+@app.route("/set_bottom_grid", methods = ['POST'])
+def set_bottom_grid():
+    database.set_bottom_grid()
     return redirect(url_for('home'))
 
 if __name__ == "__main__":

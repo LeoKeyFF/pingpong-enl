@@ -13,14 +13,12 @@
         updateDynamicContent();
         });
     </script>
-    <div id="dynamic-content"></div>
-
     <div class="container">
         <header>
             <h1>ЕНЛ - PING PONG</h1>
         </header>
 
-        <div class="input-section">
+        <div class="input-section" id="add_players_page">
             <label>Введите участников турнира через запятую:</label>
 
             <form action="/add_players" method="POST">
@@ -36,72 +34,19 @@
         <form action="/set_top_grid" method="POST">
             <button type="submit" class="btn btn-secondary">Создать сетку</button>
         </form>
-        <form action="/get_from_top_grid" method="GET">
-            <button type="submit" class="btn btn-secondary">Загрузить сетку</button>
-        </form>
         <form action="/cleen" method="POST">
             <button type="submit" class="btn btn-secondary">Очистить</button>
         </form>
+        <form action="/set_bottom_grid" method="POST">
+            <button type="submit" class="btn btn-secondary">Нижняя сетка</button>
+        </form>
 
-        <div id="topgrid"></div>
+        <div class="tournament-container" id="top_grid_page">
+            <div id="topgrid" class="tournament-grid"></div>
+        </div>
 
-        <div class="tournament-container">
-            <div class="tournament-grid">
-                <table class="grid-table">
-                    <thead>
-                        <tr>
-                            {% for round in rounds %}
-                                <th scope="col">
-                                    {% if (round != 1) %}
-                                        <div class="round-header">1/{{round}} Финала</div>
-                                    {% else %}
-                                        <div class="round-header">Финал</div>
-                                    {% endif %}
-                                </th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for round in round_indexes %}
-                            <tr>
-                                {% for row in rows %}
-                                    {% if (row[4] == round) %}
-                                        <td rowspan="{{all_rounds/row[0]}}">
-                                            {% if row[3] == '' %}
-                                                {% if row[1] == '' or row[2] == '' %}
-                                                    <div class="player-box">
-                                                        <div class="player-name">{{row[1]}}</div>
-                                                        <hr>
-                                                        <div class="player-name">{{row[2]}}</div>
-                                                    </div>
-                                                {% else %}
-                                                    <div class="player-box" onclick="openChooseWinner('{{row[0]}}','{{row[1]}}', '{{row[2]}}')">
-                                                        <div class="player-name">{{row[1]}}</div>
-                                                        <hr>
-                                                        <div class="player-name">{{row[2]}}</div>
-                                                    </div>
-                                                {% endif %}
-                                            {% else %}
-                                                <div class="player-box" >
-                                                    {% if row[3] == row[1] %}
-                                                        <div class="player-name-winner">{{row[1]}}</div>
-                                                        <hr>
-                                                        <div class="player-name">{{row[2]}}</div>
-                                                    {% else %}
-                                                        <div class="player-name">{{row[1]}}</div>
-                                                        <hr>
-                                                        <div class="player-name-winner">{{row[2]}}</div>
-                                                    {% endif %}
-                                                </div>
-                                            {% endif %}
-                                        </td>
-                                    {% endif %}
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="tournament-container" id="bottom_grid_page">
+            <div id="bottomgrid" class="tournament-grid"></div>
         </div>
     </div>
     <dialog id="chooseWinner" aria-modal="true" >
