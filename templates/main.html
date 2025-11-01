@@ -11,35 +11,31 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
         updateDynamicContent();
+        showPage(0);
         });
     </script>
     <div class="container">
-        <header>
-            <h1>ЕНЛ - PING PONG</h1>
+        <header class = "header">
+             <div class="header-content">
+                <h1 class="header-text">ЕНЛ - PING PONG</h1>
+             </div>
         </header>
-
+        <ul class="tabs" id="not_in_start">
+            <li class="tab active" onclick="showPage(0)" >Верхняя сетка</li>
+            <li class="tab" onclick="showPage(1)" >Нижняя сетка</li>
+        </ul>
         <div class="input-section" id="add_players_page">
             <label>Введите участников турнира через запятую:</label>
-
-            <form action="/add_players" method="POST">
+            <form action="/start_tour" method="POST">
                 <div class="input-group">
                     <input name ="names" class="player-input" placeholder="Игроки">
                 </div>
                 <div class="button-group">
-                    <button class="btn btn-primary" type="submit">Добавить игроков</button>
+                    <button class="btn btn-primary" type="submit" onclick="showPage(0)" id="start" >Начать турнир</button>
                 </div>
             </form>
-        </div>
 
-        <form action="/set_top_grid" method="POST">
-            <button type="submit" class="btn btn-secondary">Создать сетку</button>
-        </form>
-        <form action="/cleen" method="POST">
-            <button type="submit" class="btn btn-secondary">Очистить</button>
-        </form>
-        <form action="/set_bottom_grid" method="POST">
-            <button type="submit" class="btn btn-secondary">Нижняя сетка</button>
-        </form>
+        </div>
 
         <div class="tournament-container" id="top_grid_page">
             <div id="topgrid" class="tournament-grid"></div>
@@ -48,6 +44,11 @@
         <div class="tournament-container" id="bottom_grid_page">
             <div id="bottomgrid" class="tournament-grid"></div>
         </div>
+
+        <form action="/cleen" method="POST" id="cleen_button">
+            <button type="submit" class="btn btn-secondary">Очистить</button>
+        </form>
+
     </div>
     <dialog id="chooseWinner" aria-modal="true" >
         <h2 id="heading">Победитель:</h2>

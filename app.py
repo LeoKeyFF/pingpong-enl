@@ -19,6 +19,23 @@ def add_players():
     return redirect(url_for('home'))
 
 
+@app.route("/start_tour", methods = ['POST'])
+def start_tour():
+    # Players
+    names = request.form['names']
+    if names:
+        names = names.split(",")
+        for name in names:
+            database.add_players(name)
+    
+    #Top Grid
+    database.set_top_grid()
+
+    #Bottom Grid
+    database.set_bottom_grid()
+    
+    return redirect(url_for('home'))
+
 @app.route("/get_data_top", methods = ['GET'])
 def get_data_top():
     rounds, rounds_players = database.get_from_top_grid()

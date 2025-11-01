@@ -159,26 +159,6 @@ def get_from_top_grid():
     connection.close()
     return rounds, rounds_players
 
-def get_from_bottom_grid():
-    connection = sqlite3.connect('database.db')
-    cursor = connection.cursor()
-    rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM BottomGrid").fetchall()))
-    rounds = []
-    for r in rounds_:
-        if r[0] not in rounds:
-            rounds.append(r[0])
-    rounds.sort(reverse= False)
-    rounds_players = cursor.execute(
-         f"SELECT r.RoundNumber, COALESCE(p1.Name, ''),COALESCE(p2.Name, ''), COALESCE(w.Name, '') "
-         "FROM BottomGrid r "
-         "LEFT JOIN Players p1 ON r.Player1ID = p1.PlayerID "
-         "LEFT JOIN Players p2 ON r.Player2ID = p2.PlayerID "
-        "LEFT JOIN Players w ON r.Winner = w.PlayerID "
-         "ORDER BY r.RoundNumber"
-    ).fetchall()
-    connection.close()
-    return rounds, rounds_players
-
 
 def set_winner(bracket_id , winner):
     connection = sqlite3.connect('database.db')
@@ -232,7 +212,164 @@ def send_winner(winner, round, grid):
     connection.commit()
     connection.close()
 
+
+def get_from_bottom_grid():
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+
+    bottom_rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM BottomGrid").fetchall()))
+    bottom_rounds = []
+    for r in bottom_rounds_:
+        if r[0] not in bottom_rounds:
+            bottom_rounds.append(r[0])
+    bottom_rounds.sort(reverse = True)
+
+    top_rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM TopGrid").fetchall()))
+    top_rounds = []
+    for r in top_rounds_:
+        if r[0] not in top_rounds:
+            top_rounds.append(r[0])
+    top_rounds.sort(reverse = True)
+
+    max_bottom_round = cursor.execute(
+            f"SELECT MAX(RoundNumber) FROM BottomGrid"
+        ).fetchall()[0][0]
+
+    for bottom_round in bottom_rounds:
+        if cursor.execute(
+            f"SELECT COUNT(*) FROM BottomGrid WHERE RoundNumber = {bottom_round} AND Player1ID IS NOT NULL"
+        ).fetchall()[0][0] != 0:
+            continue
+
+        players = []
+
+        # Добавляем проигравших с верхней сетки
+        if bottom_round == max_bottom_round and bottom_round not in top_rounds:
+            losers = cursor.execute(
+                f"SELECT Player1ID FROM TopGrid WHERE Player1ID != Winner AND RoundNumber = {4*bottom_round/3} UNION ALL SELECT Player2ID FROM TopGrid WHERE Player2ID != Winner AND RoundNumber = {4*bottom_round/3}"
+            ).fetchall()
+            is_complite = True
+            winners = cursor.execute(
+                f"SELECT Winner FROM TopGrid WHERE RoundNumber = {4*bottom_round/3}"
+            ).fetchall()
+            for winner in winners:
+                if winner[0] == None:
+                    is_complite = False
+            if is_complite:
+                players += losers
+            else:
+                continue
+        else:
+            if bottom_round in top_rounds:
+                losers = cursor.execute(
+                    f"SELECT Player1ID FROM TopGrid WHERE Player1ID != Winner AND RoundNumber = {bottom_round} UNION ALL SELECT Player2ID FROM TopGrid WHERE Player2ID != Winner AND RoundNumber = {bottom_round}"
+                ).fetchall()
+                is_complite = True
+                winners = cursor.execute(
+                    f"SELECT Winner FROM TopGrid WHERE RoundNumber = {bottom_round}"
+                ).fetchall()
+                for winner in winners:
+                    if winner[0] == None:
+                        is_complite = False
+                if is_complite:
+                    players += losers
+                else:
+                    continue
+
+        # Добавляем победителей из прошлого раунда нижней сетки
+        if bottom_round != max_bottom_round:
+            bottom_winners_before = cursor.execute(
+                f"SELECT Winner FROM BottomGrid WHERE RoundNumber = {bottom_rounds[bottom_rounds.index(bottom_round) - 1]}"
+            ).fetchall()
+            is_complite = True
+            for winner in bottom_winners_before:
+                if winner[0] == None:
+                    is_complite = False
+
+            if is_complite:
+                players += bottom_winners_before
+            else:
+                continue
+
+        random.shuffle(players)
+        
+        if len(players) == 0:
+            continue
+
+        amount_of_playes = cursor.execute(
+            f"SELECT COUNT(*) FROM BottomGrid WHERE RoundNumber = {bottom_round}"
+        ).fetchall()[0][0]
+        print(players)
+
+        brackets_id = cursor.execute(
+            f"SELECT BracketID FROM BottomGrid WHERE RoundNumber = {bottom_round}"
+        ).fetchall()
+        # Записываем игроков в раунде
+        for i in range (0, int(amount_of_playes)):
+            if int(amount_of_playes) + i < len(players):
+                cursor.execute(
+                    f"UPDATE BottomGrid SET Player1ID = {players[i][0]}, Player2ID = {players[int(amount_of_playes) + i][0]} WHERE BracketID = {brackets_id[i][0]}"
+                    #f"UPDATE BottomGrid SET Player1ID = {players[i][0]}, Player2ID = {players[int(amount_of_playes) + i][0]} WHERE RoundNumber = {bottom_round} AND Player1ID IS NULL AND Player2ID  IS NULL"
+                )
+            else:
+                cursor.execute(
+                    f"UPDATE BottomGrid SET Player1ID = {players[i][0]} WHERE BracketID = {brackets_id[i][0]}"
+                    )  
+                set_winner_logic(brackets_id[i][0] , players[i][0], connection, cursor, 1)
+
+    rounds_players = cursor.execute(
+         f"SELECT r.RoundNumber, COALESCE(p1.Name, ''),COALESCE(p2.Name, ''), COALESCE(w.Name, '') "
+         "FROM BottomGrid r "
+         "LEFT JOIN Players p1 ON r.Player1ID = p1.PlayerID "
+         "LEFT JOIN Players p2 ON r.Player2ID = p2.PlayerID "
+        "LEFT JOIN Players w ON r.Winner = w.PlayerID "
+         "ORDER BY r.RoundNumber"
+    ).fetchall()
+
+    connection.commit()
+    connection.close()
+    return bottom_rounds, rounds_players
+
+
 def set_bottom_grid():
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS BottomGrid ( BracketID INTEGER PRIMARY KEY," 
+          "RoundNumber REAL, Player1ID INT, Player2ID INT, Winner INT,"
+          " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+    )
+    
+    amount_players = cursor.execute(
+        f"SELECT COUNT(*) FROM Players"
+    ).fetchall()[0][0]
+
+    rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM TopGrid").fetchall()))
+    rounds = []
+    for r in rounds_:
+        if r[0] not in rounds:
+            rounds.append(r[0])
+    rounds.sort(reverse = True)
+
+    for round in rounds:
+        for bracket_id in range(1, int(round) + 1):
+            if  round != max(rounds):
+                cursor.execute(
+                    f"INSERT INTO BottomGrid (RoundNumber) VALUES ({round})"
+                )
+        for bracket_id in range(1, int(round/2) + 1):
+            # если не первый раунд или в нём игроков больше чем половина всех возможных:
+            if round != max(rounds) or (amount_players - round)  >  (round / 2):
+                cursor.execute(
+                    f"INSERT INTO BottomGrid (RoundNumber) VALUES ({3*round/4})"
+                )
+
+    connection.commit()
+    connection.close()
+
+def set_bottom_grid__():
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
 

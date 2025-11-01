@@ -6,21 +6,6 @@ let grid
 let winner
 let winner_bottom
 
-// let get_from_top_grid = {
-//         'rows': Array(), 
-//         'rounds_players': Array(),
-//         'rounds': Array(),
-//         'round_indexes': Array(),
-//         'all_rounds': String
-// }
-
-// let get_from_bottom_grid = {
-//         'rows': Array(), 
-//         'rounds_players': Array(),
-//         'rounds': Array(),
-//         'round_indexes': Array(),
-//         'all_rounds': String
-// }
 
 function openChooseWinner(r, p1, p2, grid_){
     player1 = p1;
@@ -80,21 +65,6 @@ async function sendWinners(){
             updateDynamicContent()
         }
     });
-
-    $.ajax({
-        type: "POST",
-        url: '/set_bottom_grid',
-        contentType: 'application/json; charset=utf-8',
-        success: function (response, status, jqXHR) {
-            updateDynamicContent()
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-            // Error handling
-        },
-        complete: function (jqXHR, textStatus) {
-            updateDynamicContent()
-        }
-    });
 }
 
 function createGridTable(id, data, div_id, grid_){
@@ -106,27 +76,18 @@ function createGridTable(id, data, div_id, grid_){
     const headerRow = $('<tr>');
 
     for (const round of data.rounds){
-        if (grid_ == 0){
-            th = $('<th>');
-            if (round != 1){
-                divHead =  $('<div>',{
-                    class: 'round-header',
-                    text: "1/" + round + " Финала"
-                });
-            } else {
-                divHead =  $('<div>',{
-                    class: 'round-header',
-                    text: "Финал"
-                });
-            }
-        } else{
-            th = $('<th>');
-            divHead = $('<div>', {
+        th = $('<th>');
+        if (round != 1){
+            divHead =  $('<div>',{
                 class: 'round-header',
-                text: "Раунд " + round
+                text: "1/" + round + " Финала"
+            });
+        } else {
+            divHead =  $('<div>',{
+                class: 'round-header',
+                text: "Финал"
             });
         }
-
 
         th.append(divHead)
         headerRow.append(th);
@@ -226,6 +187,13 @@ function updateDynamicContent() {
         success: function(data) {
             // get_from_top_grid = data;
             $('#topGridTable').remove();
+            if (data.rounds.length == 0){
+                $("#bottom_grid_page").css("display", "none");
+                $("#add_players_page").css("display", "block");
+                $("#top_grid_page").css("display", "none");
+                $("#not_in_start").css("display", "none");
+                $("#cleen_button").css("display", "none");
+            }
             createGridTable(id='topGridTable', data = data, div_id = '#topgrid', grid_ = '0');
         },
         error: function() {
@@ -238,7 +206,6 @@ function updateDynamicContent() {
         method: 'GET',
         dataType: 'json',
         success: function (data) {
-            // get_from_bottom_grid = data;
             $('#bottomGridTable').remove();
             createGridTable(id='bottomGridTable', data = data, div_id = '#bottomgrid', grid_ = '1');
         },
@@ -248,6 +215,26 @@ function updateDynamicContent() {
     });
 }
 
+function showPage(page) {
+    top_grid_page = document.getElementById("top_grid_page");
+    bottom_grid_page = document.getElementById("bottom_grid_page");
+
+    if (page == 0){
+        $("#bottom_grid_page").css("display", "none");
+        $("#add_players_page").css("display", "none");
+        $("#top_grid_page").css("display", "block");
+        
+    } 
+    else if (page == 1){
+        $("#bottom_grid_page").css("display", "block");
+        $("#add_players_page").css("display", "none");
+        $("#top_grid_page").css("display", "none");
+        
+    } 
+    $('.tab').removeClass('active');
+    $('.tab').eq(page).addClass('active')
+
+}
 
 
 

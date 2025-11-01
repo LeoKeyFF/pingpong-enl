@@ -1,50 +1,3 @@
-/* body {
-    font-family: Arial, sans-serif;
-    margin: 0px;
-    padding: 0px;
-    background-color: #f4f4f4;
-    text-align: center;
-}
-
-header {
-    background-image: linear-gradient(to right, rgb(48, 23, 198), rgb(211, 9, 49));
-    color: #fff;
-    padding: 10px;
-    text-align: center;
-    font-family: Arial, Verdana, sans-serif;
-}
-
-button {
-    background-color: #d65f1a; 
-    color: white;
-    width: 40%;
-    height: 50px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border: none;
-    border-radius: 8px
-}
-
-label{
-    color: black;
-    margin: 10px;
-}
-textarea{
-    align-self: center;
-    height: 130px;
-    width: 50%;
-    resize: none;
-    display: inline-block;
-    border: none;
-    border-radius: 16px;
-    padding: 10px;
-    margin: 10px;
-} */
-
 * {
     margin: 0;
     padding: 0;
@@ -58,6 +11,26 @@ body {
     min-height: 100vh;
     padding: 20px;
 }
+
+.header{
+    height: 70px;
+    display: flex;
+    /* align-items: center;
+    justify-content: center; */
+    position: relative;
+    overflow: hidden;
+}
+.header-content {
+    z-index: 1;
+}
+.header-text {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    background-clip: text;
+    color: transparent;
+    margin-top: 20px;
+    margin-left: 10px;
+}
+
 dialog {
     position: fixed;
     top: 50%;
@@ -101,7 +74,8 @@ dialog {
     background: rgba(255, 255, 255, 0.1);
     padding: 20px;
     border-radius: 12px;
-    margin-bottom: 30px;
+    margin-top: 15%;
+    align-self: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
@@ -159,6 +133,7 @@ dialog {
 .btn-secondary {
     background: linear-gradient(135deg, #2196F3, #0b7dda);
     color: white;
+    margin: 5px;
 }
 
 .btn-secondary:hover {
@@ -238,6 +213,26 @@ dialog {
 .player-info {
     font-size: 0.9rem;
     color: #666;
+}
+
+.tabs {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 50%;
+    border-bottom: none;
+    margin: 5px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab.active {
+    background: linear-gradient(135deg, #2196F3, #0b7dda);
 }
 
 .round-1-8 .player-box {
