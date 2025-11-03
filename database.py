@@ -497,3 +497,31 @@ def cleen():
     connection.commit()
     connection.close()
 
+def create_base_tables():
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS Players (
+    PlayerID INTEGER PRIMARY KEY,
+    Name varchar(255)
+    )
+    ''')
+
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS TopGrid ( BracketID INTEGER PRIMARY KEY," 
+          "RoundNumber INT, Player1ID INT, Player2ID INT, Winner INT, NextBracketID INT,"
+          " FOREIGN KEY (NextBracketID) REFERENCES TopGrid (BracketID), FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+    )
+
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS BottomGrid ( BracketID INTEGER PRIMARY KEY," 
+          "RoundNumber REAL, Player1ID INT, Player2ID INT, Winner INT,"
+          " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+    )
+
+
+    connection.commit()
+    connection.close()

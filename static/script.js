@@ -236,6 +236,20 @@ function showPage(page) {
 
 }
 
+async function createDatabaseTables(){
+
+    $.ajax({
+        type: "POST",
+        url: '/create_base_tables',
+        success: function (response, status, jqXHR) {
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+        },
+        complete: function (jqXHR, textStatus) {
+        }
+    });
+}
+
 
 
 

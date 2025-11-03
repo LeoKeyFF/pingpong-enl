@@ -124,5 +124,10 @@ def set_bottom_grid():
     database.set_bottom_grid()
     return redirect(url_for('home'))
 
+@app.route("/create_base_tables", methods = ['POST'])
+def create_base_tables():
+    database.create_base_tables()
+    return redirect(url_for('home'))
+
 if __name__ == "__main__":
     app.run(debug=True, host = "0.0.0.0")
