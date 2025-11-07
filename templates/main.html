@@ -10,16 +10,24 @@
 <body>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-        createDatabaseTables();
-        updateDynamicContent();
-        showPage(0);
+            createDatabaseTables();
+            updateDynamicContent()
+            showPage(0);
+            setInterval(function() {updateDynamicContent();}, 5000)
         });
     </script>
     <div class="container">
         <header class = "header">
-             <div class="header-content">
-                <h1 class="header-text">ЕНЛ - PING PONG</h1>
-             </div>
+            <table class="head-table">
+                <tr>
+                    <td>
+                        <h1 class="header-text">ЕНЛ — Ping Pong</h1>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" onclick="openAccDialog()" id="acc_button"></button>
+                    </td>
+                </tr>
+            </table>
         </header>
         <ul class="tabs" id="not_in_start">
             <li class="tab active" onclick="showPage(0)" >Верхняя сетка</li>
@@ -47,7 +55,7 @@
         </div>
 
         <form action="/cleen" method="POST" id="cleen_button">
-            <button type="submit" class="btn btn-secondary">Очистить</button>
+            <button type="submit" class="btn btn-secondary" id="cleen_button_itself">Очистить</button>
         </form>
 
     </div>
@@ -65,7 +73,23 @@
         </div>
     </dialog>
 
+    <dialog id="account" aria-modal="true" >
+        <h2 id="heading">Вход в режим редактора:</h2>
+        <div display = "flex">
+            <form action="/account" method="POST">
+                <table class="dialog-table">
+                    <tr>
+                        <td>
+                            <input name ="password" class="password-input" placeholder="Пароль">
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" type="submit" onclick="closeAccount()" id="start" >Войти</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </dialog>
+
 </body>
 </html>
-<!-- window.chooseWinner.show() -->
- <!-- this.closest('form').submit() -->

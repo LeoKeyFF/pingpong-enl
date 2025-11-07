@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
 import database
-import random
 
 app = Flask(__name__)
 
@@ -8,31 +7,20 @@ app = Flask(__name__)
 def home():
     return render_template("main.html")
 
-@app.route("/add_players", methods = ['POST'])
-def add_players():
-    names = request.form['names']
-    if names:
-        names = names.split(",")
-        for name in names:
-            database.add_players(name)
-    
-    return redirect(url_for('home'))
-
-
 @app.route("/start_tour", methods = ['POST'])
 def start_tour():
     # Players
     names = request.form['names']
-    if names:
+    if names and len(names) != 0 and len(names.split(",")) < 129:
         names = names.split(",")
         for name in names:
             database.add_players(name)
     
-    #Top Grid
-    database.set_top_grid()
+        #Top Grid
+        database.set_top_grid()
 
-    #Bottom Grid
-    database.set_bottom_grid()
+        #Bottom Grid
+        database.set_bottom_grid()
     
     return redirect(url_for('home'))
 
@@ -73,8 +61,6 @@ def get_data_bottom():
         if max_for_round >= max_players:
             max_players = max_for_round
 
-    # if len(rounds) > 0:
-    #     all_rounds = int(max(rounds))
     round_indexes = list(range(0, max_players))
     rows = []
     for round in rounds:
@@ -104,14 +90,12 @@ def cleen():
     database.cleen()
     return redirect(url_for('home'))
 
-@app.route("/set_top_grid", methods = ['POST'])
-def set_top_grid():
-    database.set_top_grid()
-    return redirect(url_for('home'))
-
 
 @app.route("/send_winner", methods = ['POST'])
 def send_winner():
+    password = request.cookies.get('password')
+    if password:
+        pass
     data = request.get_json()
     winner = data.get('winner', '')
     round = float(data.get('round', ''))
@@ -119,15 +103,35 @@ def send_winner():
     database.send_winner(winner, round, grid)
     return redirect(url_for('home'))
 
-@app.route("/set_bottom_grid", methods = ['POST'])
-def set_bottom_grid():
-    database.set_bottom_grid()
-    return redirect(url_for('home'))
 
 @app.route("/create_base_tables", methods = ['POST'])
 def create_base_tables():
     database.create_base_tables()
     return redirect(url_for('home'))
+
+@app.route("/account", methods = ['POST'])
+def account():
+    password = request.form['password']
+    print(password)
+    resp = make_response(redirect(url_for('home')))
+    resp.set_cookie('password', password, max_age=300)
+    return resp
+
+@app.route("/get_account", methods = ['GET'])
+def get_account():
+    password = request.cookies.get('password')
+    right_password = "123400"
+    data = {
+        'password_correct': password ==  right_password, 
+    }
+    return jsonify(data)
+
+@app.route("/cleen_password", methods = ['POST'])
+def cleen_password():
+    resp = make_response(redirect(url_for('home')))
+    resp.set_cookie('password', '', max_age=0)
+    return resp
+
 
 if __name__ == "__main__":
     app.run(debug=True, host = "0.0.0.0")

@@ -6,6 +6,7 @@ let grid
 let winner
 let winner_bottom
 
+let password_correct = false
 
 function openChooseWinner(r, p1, p2, grid_){
     player1 = p1;
@@ -117,16 +118,16 @@ function createGridTable(id, data, div_id, grid_){
                 }
 
                 if (row[3] == ''){
-                    if (row[1] == '' || row[2] == ''){
-                        divPlayerBox = $('<div>',{
-                            class: 'player-box'
-                        }); 
-                    }
-                    else{
+                    if (row[1] != '' && row[2] != ''  && password_correct == true){
                         divPlayerBox = $('<div>',{
                             class: 'player-box'
                         }).on("click", function() {openChooseWinner(row[0] ,row[1], row[2], grid_)}); 
                     }
+                    else{
+                        divPlayerBox = $('<div>',{
+                            class: 'player-box'
+                        }); 
+                    }                    
                     divRow1 = $('<div>',{
                         class: 'player-name',
                         text: row[1]
@@ -180,12 +181,12 @@ function createGridTable(id, data, div_id, grid_){
 }
 
 function updateDynamicContent() {
+    check_passwors()
     $.ajax({
         url: '/get_data_top',  // Flask route URL
         method: 'GET',
         dataType: 'json',
         success: function(data) {
-            // get_from_top_grid = data;
             $('#topGridTable').remove();
             if (data.rounds.length == 0){
                 $("#bottom_grid_page").css("display", "none");
@@ -208,6 +209,37 @@ function updateDynamicContent() {
         success: function (data) {
             $('#bottomGridTable').remove();
             createGridTable(id='bottomGridTable', data = data, div_id = '#bottomgrid', grid_ = '1');
+        },
+        error: function () {
+            console.error('Error fetching data.');
+        }
+    });
+}
+
+function check_passwors(){
+    $.ajax({
+        url: '/get_account',
+        method: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            password_correct = data.password_correct
+            if (password_correct){
+                $("#acc_button").text("Выйти");
+                $("#acc_button").removeClass("btn btn-primary");
+                $("#acc_button").addClass("btn btn-tertiary");
+
+                $("#start").prop('disabled', false);
+                $("#cleen_button").prop('disabled', false);
+
+            } else {
+                $("#acc_button").removeClass("btn btn-tertiary");
+                $("#acc_button").addClass("btn btn-primary");
+                $("#acc_button").text("Войти");
+
+                $("#start").prop('disabled', true);
+                $("#cleen_button_itself").prop('disabled', true);
+                $('.player-box').on("click", function() {return false})
+            }
         },
         error: function () {
             console.error('Error fetching data.');
@@ -249,6 +281,39 @@ async function createDatabaseTables(){
         }
     });
 }
+
+function openAccDialog(){
+    const dialog = document.getElementById("account");
+
+    if(password_correct){ 
+        $.ajax({
+            type: "POST",
+            url: '/cleen_password',
+            success: function (response, status, jqXHR) {
+                updateDynamicContent()
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+            },
+            complete: function (jqXHR, textStatus) {
+            }
+        });
+
+    } else {
+        dialog.addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.close();
+            }
+        });
+
+        dialog.showModal();   
+    }
+}
+
+function closeAccount(){
+    const dialog = document.getElementById("account");
+    dialog.close();
+}
+
 
 
 
