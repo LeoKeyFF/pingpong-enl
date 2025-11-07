@@ -2,6 +2,8 @@ import sqlite3
 import random
 import math
 from datetime import datetime
+import threading
+import time
 
 def init_db():
     connection = sqlite3.connect('database.db')
@@ -24,15 +26,9 @@ def add_players(name_):
     connection.commit()
     connection.close()
 
-def get_players():
-    connection = sqlite3.connect('database.db')
-    cursor = connection.cursor()
-
+def get_players(cursor):
     select_players = cursor.execute(f"SELECT Name FROM Players")
     players = select_players.fetchall()
-
-    connection.close()
-    
     return players
 
 def set_top_grid():
@@ -40,7 +36,7 @@ def set_top_grid():
     cursor = connection.cursor()
 
     players_orign = list()
-    for player in get_players():
+    for player in get_players(cursor):
          players_orign.append(player[0].replace(" ", ""))
 
     players = players_orign[:]
@@ -61,7 +57,7 @@ def set_top_grid():
           " FOREIGN KEY (NextBracketID) REFERENCES TopGrid (BracketID), FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
           " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
     )
-
+    connection.commit()
     counter_next = 0
     counter_id = 1
     for n in range(1, int(first_round)):
@@ -87,15 +83,19 @@ def set_top_grid():
                 )
             counter_id += 2
 
+    connection.commit()
     for i in range (0, int(first_round)):
         if int(first_round) + i < len(players):
             cursor.execute(
                 f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1}, Player2ID = {players_orign.index(players[int(first_round) + i]) + 1} WHERE BracketID = {i + 1}"
             )
+            connection.commit()
         else:
             cursor.execute(
                 f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1} WHERE BracketID = {i + 1}"
                 )  
+            connection.commit()
+            time.sleep(1) 
             bracket_id_win = cursor.execute(
                 f"SELECT BracketID FROM TopGrid WHERE Player1ID = {players_orign.index(players[i]) + 1}"
                 ).fetchall()[0][0]
@@ -150,8 +150,6 @@ def set_winner_logic(bracket_id , winner, connection, cursor, grid):
             f"SELECT NextBracketID FROM TopGrid WHERE BracketID = {bracket_id}"
         ).fetchall()[0][0]
         if (next_bracket_id  != None):
-            print("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-            print(next_bracket_id, winner)
             cursor.execute(
                 f"UPDATE TopGrid SET Player1ID = CASE WHEN BracketID = {next_bracket_id} AND (Player1ID IS NULL OR Player1ID = '') THEN {winner} ELSE Player1ID END, Player2ID = CASE WHEN Player1ID IS NOT NULL AND Player1ID != '' AND (Player2ID IS NULL OR Player2ID = '') AND BracketID = {next_bracket_id} THEN {winner} ELSE Player2ID END"
             )
@@ -286,7 +284,6 @@ def get_from_bottom_grid():
         amount_of_playes = cursor.execute(
             f"SELECT COUNT(*) FROM BottomGrid WHERE RoundNumber = {bottom_round}"
         ).fetchall()[0][0]
-        print(players)
 
         brackets_id = cursor.execute(
             f"SELECT BracketID FROM BottomGrid WHERE RoundNumber = {bottom_round}"

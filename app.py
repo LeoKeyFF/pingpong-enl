@@ -112,7 +112,6 @@ def create_base_tables():
 @app.route("/account", methods = ['POST'])
 def account():
     password = request.form['password']
-    print(password)
     resp = make_response(redirect(url_for('home')))
     resp.set_cookie('password', password, max_age=300)
     return resp
@@ -134,4 +133,4 @@ def cleen_password():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host = "0.0.0.0")
+    app.run(debug=False, host = "0.0.0.0")
