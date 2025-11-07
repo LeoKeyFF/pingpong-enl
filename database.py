@@ -1,9 +1,5 @@
 import sqlite3
 import random
-import math
-from datetime import datetime
-import threading
-import time
 
 def init_db():
     connection = sqlite3.connect('database.db')
@@ -83,19 +79,16 @@ def set_top_grid():
                 )
             counter_id += 2
 
-    connection.commit()
     for i in range (0, int(first_round)):
         if int(first_round) + i < len(players):
             cursor.execute(
                 f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1}, Player2ID = {players_orign.index(players[int(first_round) + i]) + 1} WHERE BracketID = {i + 1}"
             )
-            connection.commit()
+
         else:
             cursor.execute(
                 f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1} WHERE BracketID = {i + 1}"
                 )  
-            connection.commit()
-            time.sleep(1) 
             bracket_id_win = cursor.execute(
                 f"SELECT BracketID FROM TopGrid WHERE Player1ID = {players_orign.index(players[i]) + 1}"
                 ).fetchall()[0][0]
@@ -293,7 +286,6 @@ def get_from_bottom_grid():
             if int(amount_of_playes) + i < len(players):
                 cursor.execute(
                     f"UPDATE BottomGrid SET Player1ID = {players[i][0]}, Player2ID = {players[int(amount_of_playes) + i][0]} WHERE BracketID = {brackets_id[i][0]}"
-                    #f"UPDATE BottomGrid SET Player1ID = {players[i][0]}, Player2ID = {players[int(amount_of_playes) + i][0]} WHERE RoundNumber = {bottom_round} AND Player1ID IS NULL AND Player2ID  IS NULL"
                 )
             else:
                 cursor.execute(
