@@ -1,3 +1,4 @@
+import json
 import sqlite3
 import random
 
@@ -31,6 +32,7 @@ def set_top_grid():
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
 
+    history = []
     players_orign = list()
     for player in get_players(cursor):
          players_orign.append(player[0].replace(" ", ""))
@@ -49,9 +51,10 @@ def set_top_grid():
 
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS TopGrid ( BracketID INTEGER PRIMARY KEY," 
-          "RoundNumber INT, Player1ID INT, Player2ID INT, Winner INT, NextBracketID INT,"
-          " FOREIGN KEY (NextBracketID) REFERENCES TopGrid (BracketID), FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
-          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+          "RoundNumber INT, Player1ID INT, Player2ID INT, Winner INT, NextBracketID INT"
+        #   " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+        #   " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+        ")"
     )
     connection.commit()
     counter_next = 0
@@ -64,51 +67,70 @@ def set_top_grid():
 
             is_last = cursor.execute(f"SELECT COUNT(*) FROM TopGrid WHERE BracketID = {counter_id} ").fetchall()[0]
             if is_last[0] == 0:
+                message = f"INSERT INTO TopGrid (NextBracketID) VALUES ({counter_next + first_round})"
+                cursor.execute(
+                    message
+                )
+                history.append(message)
+
+                message = f"INSERT INTO TopGrid (NextBracketID) VALUES ({counter_next + first_round})"
                 cursor.execute(
                     f"INSERT INTO TopGrid (NextBracketID) VALUES ({counter_next + first_round})"
                 )
-                cursor.execute(
-                    f"INSERT INTO TopGrid (NextBracketID) VALUES ({counter_next + first_round})"
-                )
+                history.append(message)
             else:
+                message = f"INSERT INTO TopGrid (NextBracketID) VALUES ({counter_next + first_round})"
                 cursor.execute(
-                    f"UPDATE TopGrid SET NextBracketID = {counter_next + first_round} WHERE BracketID = {counter_id}"
+                    f"INSERT INTO TopGrid (NextBracketID) VALUES ({counter_next + first_round})"
                 )
+                history.append(message)
+
+                message = f"UPDATE TopGrid SET NextBracketID = {counter_next + first_round} WHERE BracketID = {counter_id + 1}"
                 cursor.execute(
                     f"UPDATE TopGrid SET NextBracketID = {counter_next + first_round} WHERE BracketID = {counter_id + 1}"
                 )
+                history.append(message)
             counter_id += 2
 
     for i in range (0, int(first_round)):
         if int(first_round) + i < len(players):
+            message = f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1}, Player2ID = {players_orign.index(players[int(first_round) + i]) + 1} WHERE BracketID = {i + 1}"
             cursor.execute(
-                f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1}, Player2ID = {players_orign.index(players[int(first_round) + i]) + 1} WHERE BracketID = {i + 1}"
+                message
             )
-
+            history.append(message)
         else:
+            message = f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1} WHERE BracketID = {i + 1}"
             cursor.execute(
-                f"UPDATE TopGrid SET Player1ID = {players_orign.index(players[i]) + 1} WHERE BracketID = {i + 1}"
-                )  
+                message
+            )  
+            history.append(message)
             bracket_id_win = cursor.execute(
                 f"SELECT BracketID FROM TopGrid WHERE Player1ID = {players_orign.index(players[i]) + 1}"
                 ).fetchall()[0][0]
-            set_winner_logic(bracket_id_win , int(players_orign.index(players[i]) + 1), connection, cursor, 0)
+            set_winner_logic(bracket_id_win , int(players_orign.index(players[i]) + 1), connection, cursor, 0, history)
 
 
     m = 0
     counter = 0
     while (first_round / (2**m)) >= 1:
         for bracket_id in range(1, int(first_round / (2**m) )+ 1):
-             counter += 1
-             cursor.execute(
-                f"UPDATE TopGrid SET RoundNumber = {int(first_round / (2**m) )} WHERE BracketID = {counter}"
+            counter += 1
+            message = f"UPDATE TopGrid SET RoundNumber = {int(first_round / (2**m) )} WHERE BracketID = {counter}"
+            cursor.execute(
+                message
             )
-             if cursor.execute(f"SELECT COUNT(*) FROM TopGrid WHERE BracketID = {counter} ").fetchall()[0][0] == 0:
+            history.append(message)
+            if cursor.execute(f"SELECT COUNT(*) FROM TopGrid WHERE BracketID = {counter} ").fetchall()[0][0] == 0:
+                message = f"INSERT INTO TopGrid (RoundNumber) VALUES ({int(first_round / (2**m) )})"
                 cursor.execute(
-                    f"INSERT INTO TopGrid (RoundNumber) VALUES ({int(first_round / (2**m) )})"
+                    message
                 )
+                history.append(message)
         m+=1
 
+    if len(history) > 0:
+        history_append(history)
     connection.commit()
     connection.close()
 
@@ -134,22 +156,36 @@ def get_from_top_grid():
     return rounds, rounds_players
 
 
-def set_winner_logic(bracket_id , winner, connection, cursor, grid):
+def set_winner_logic(bracket_id , winner, connection, cursor, grid, history_ = None):
+    history = []
     if grid == 0:
+        message = f"UPDATE TopGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
         cursor.execute(
-            f"UPDATE TopGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
+            message
         )
+        history.append(message)
         next_bracket_id = cursor.execute(
             f"SELECT NextBracketID FROM TopGrid WHERE BracketID = {bracket_id}"
         ).fetchall()[0][0]
         if (next_bracket_id  != None):
+            message = f"UPDATE TopGrid SET Player1ID = CASE WHEN BracketID = {next_bracket_id} AND (Player1ID IS NULL OR Player1ID = '') THEN {winner} ELSE Player1ID END, Player2ID = CASE WHEN Player1ID IS NOT NULL AND Player1ID != '' AND (Player2ID IS NULL OR Player2ID = '') AND BracketID = {next_bracket_id} THEN {winner} ELSE Player2ID END"
             cursor.execute(
-                f"UPDATE TopGrid SET Player1ID = CASE WHEN BracketID = {next_bracket_id} AND (Player1ID IS NULL OR Player1ID = '') THEN {winner} ELSE Player1ID END, Player2ID = CASE WHEN Player1ID IS NOT NULL AND Player1ID != '' AND (Player2ID IS NULL OR Player2ID = '') AND BracketID = {next_bracket_id} THEN {winner} ELSE Player2ID END"
+                message
             )
+            history.append(message)
     else:
+        message = f"UPDATE BottomGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
         cursor.execute(
-        f"UPDATE BottomGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
+            message
         )
+        history.append(message)
+    
+    if history_ == None:
+        if len(history) > 0:
+            history_append(history)
+    else:
+        history_ += history
+        # return history_
     
 
 def send_winner(winner, round, grid):
@@ -177,6 +213,8 @@ def send_winner(winner, round, grid):
 def get_from_bottom_grid():
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
+
+    history = []
 
     bottom_rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM BottomGrid").fetchall()))
     bottom_rounds = []
@@ -284,14 +322,18 @@ def get_from_bottom_grid():
         # Записываем игроков в раунде
         for i in range (0, int(amount_of_playes)):
             if int(amount_of_playes) + i < len(players):
+                message =  f"UPDATE BottomGrid SET Player1ID = {players[i][0]}, Player2ID = {players[int(amount_of_playes) + i][0]} WHERE BracketID = {brackets_id[i][0]}"
                 cursor.execute(
-                    f"UPDATE BottomGrid SET Player1ID = {players[i][0]}, Player2ID = {players[int(amount_of_playes) + i][0]} WHERE BracketID = {brackets_id[i][0]}"
+                   message
                 )
+                history.append(message)
             else:
+                message = f"UPDATE BottomGrid SET Player1ID = {players[i][0]} WHERE BracketID = {brackets_id[i][0]}"
                 cursor.execute(
-                    f"UPDATE BottomGrid SET Player1ID = {players[i][0]} WHERE BracketID = {brackets_id[i][0]}"
-                    )  
-                set_winner_logic(brackets_id[i][0] , players[i][0], connection, cursor, 1)
+                    message
+                )  
+                history.append(message)
+                set_winner_logic(brackets_id[i][0] , players[i][0], connection, cursor, 1, history)
 
     rounds_players = cursor.execute(
          f"SELECT r.RoundNumber, COALESCE(p1.Name, ''),COALESCE(p2.Name, ''), COALESCE(w.Name, '') "
@@ -302,6 +344,9 @@ def get_from_bottom_grid():
          "ORDER BY r.RoundNumber"
     ).fetchall()
 
+
+    if len(history) > 0:
+        history_extend(history)
     connection.commit()
     connection.close()
     return bottom_rounds, rounds_players
@@ -311,11 +356,14 @@ def set_bottom_grid():
     connection = sqlite3.connect('database.db')
     cursor = connection.cursor()
 
+    history = []
+
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS BottomGrid ( BracketID INTEGER PRIMARY KEY," 
-          "RoundNumber REAL, Player1ID INT, Player2ID INT, Winner INT,"
-          " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
-          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+          "RoundNumber REAL, Player1ID INT, Player2ID INT, Winner INT"
+        #   " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+        #   " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+        ")"
     )
     
     amount_players = cursor.execute(
@@ -332,16 +380,23 @@ def set_bottom_grid():
     for round in rounds:
         for bracket_id in range(1, int(round) + 1):
             if  round != max(rounds):
+                message = f"INSERT INTO BottomGrid (RoundNumber) VALUES ({round})"
                 cursor.execute(
-                    f"INSERT INTO BottomGrid (RoundNumber) VALUES ({round})"
+                    message
                 )
+                history.append(message)
+            
         for bracket_id in range(1, int(round/2) + 1):
             # если не первый раунд или в нём игроков больше чем половина всех возможных:
             if round != max(rounds) or (amount_players - round)  >  (round / 2):
+                message = f"INSERT INTO BottomGrid (RoundNumber) VALUES ({3*round/4})"
                 cursor.execute(
-                    f"INSERT INTO BottomGrid (RoundNumber) VALUES ({3*round/4})"
+                    message
                 )
+                history.append(message)
 
+    if len(history) > 0:
+        history_append(history)
     connection.commit()
     connection.close()
 
@@ -352,6 +407,7 @@ def cleen():
     cursor.execute(f"DELETE FROM Players")
     cursor.execute(f"DELETE FROM TopGrid")
     cursor.execute(f"DELETE FROM BottomGrid")
+    history_cleen()
 
     connection.commit()
     connection.close()
@@ -369,18 +425,79 @@ def create_base_tables():
 
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS TopGrid ( BracketID INTEGER PRIMARY KEY," 
-          "RoundNumber INT, Player1ID INT, Player2ID INT, Winner INT, NextBracketID INT,"
-          " FOREIGN KEY (NextBracketID) REFERENCES TopGrid (BracketID), FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
-          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+          "RoundNumber INT, Player1ID INT, Player2ID INT, Winner INT, NextBracketID INT"
+        #   " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+        #   " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+        ")"
     )
+    #FOREIGN KEY (NextBracketID) REFERENCES TopGrid (BracketID), 
 
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS BottomGrid ( BracketID INTEGER PRIMARY KEY," 
-          "RoundNumber REAL, Player1ID INT, Player2ID INT, Winner INT,"
-          " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
-          " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+          "RoundNumber REAL, Player1ID INT, Player2ID INT, Winner INT"
+        #   " FOREIGN KEY (Player2ID) REFERENCES Players(PlayerID),"
+        #   " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
+        ")"
     )
 
+
+    connection.commit()
+    connection.close()
+
+def history_append(message):
+    history = []
+    try:
+        with open("history.json", "r") as file:
+            history = json.load(file)
+    except:
+        pass
+
+    with open("history.json", "w") as file:
+        history.append(message)
+        json.dump(history, file)
+
+
+def history_extend(message):
+    history = []
+    try:
+        with open("history.json", "r") as file:
+            history = json.load(file)
+            history[-1].extend(message)
+    except:
+        pass
+
+    with open("history.json", "w") as file:
+        json.dump(history, file)
+
+    
+def history_cleen():
+        with open("history.json", "w") as file:
+            json.dump([], file)
+
+def history_cancel():
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+ 
+    history_list = []
+    try:
+        with open("history.json", "r") as file:
+            history_list = json.load(file)[:-1]
+    except:
+        print("error")
+
+
+    if len(history_list) > 1:
+
+        cursor.execute(f"DELETE FROM TopGrid")
+        cursor.execute(f"DELETE FROM BottomGrid")
+
+        for h in history_list:
+            if len(h) > 0:
+                for message in h:
+                    cursor.execute(message)
+
+        with open("history.json", "w") as file:
+            json.dump(history_list, file)
 
     connection.commit()
     connection.close()

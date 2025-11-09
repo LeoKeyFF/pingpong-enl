@@ -194,6 +194,7 @@ function updateDynamicContent() {
                 $("#top_grid_page").css("display", "none");
                 $("#not_in_start").css("display", "none");
                 $("#cleen_button").css("display", "none");
+                $("#history_cancel").css("display", "none");
             }
             createGridTable(id='topGridTable', data = data, div_id = '#topgrid', grid_ = '0');
         },
@@ -230,6 +231,7 @@ function check_passwors(){
 
                 $("#start").prop('disabled', false);
                 $("#cleen_button").prop('disabled', false);
+                $("#history_cancel").prop('disabled', false);
 
             } else {
                 $("#acc_button").removeClass("btn btn-tertiary");
@@ -239,6 +241,7 @@ function check_passwors(){
                 $("#start").prop('disabled', true);
                 $("#cleen_button_itself").prop('disabled', true);
                 $('.player-box').on("click", function() {return false})
+                $("#history_cancel").prop('disabled', true);
             }
         },
         error: function () {
@@ -248,19 +251,18 @@ function check_passwors(){
 }
 
 function showPage(page) {
-    top_grid_page = document.getElementById("top_grid_page");
-    bottom_grid_page = document.getElementById("bottom_grid_page");
-
     if (page == 0){
         $("#bottom_grid_page").css("display", "none");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "block");
+        $("#history_cancel").css("display", "block");
         
     } 
     else if (page == 1){
         $("#bottom_grid_page").css("display", "block");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "none");
+        $("#history_cancel").css("display", "block");
         
     } 
     $('.tab').removeClass('active');
@@ -312,6 +314,20 @@ function openAccDialog(){
 function closeAccount(){
     const dialog = document.getElementById("account");
     dialog.close();
+}
+
+function history_cancel(){
+    $.ajax({
+        type: "POST",
+        url: '/history_cancel',
+        success: function (response, status, jqXHR) {
+            updateDynamicContent()
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+        },
+        complete: function (jqXHR, textStatus) {
+        }
+    });
 }
 
 

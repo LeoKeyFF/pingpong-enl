@@ -131,6 +131,10 @@ def cleen_password():
     resp.set_cookie('password', '', max_age=0)
     return resp
 
+@app.route("/history_cancel", methods = ['POST'])
+def history_cancel():
+    database.history_cancel()
+    return redirect(url_for('home'))
 
 if __name__ == "__main__":
     app.run(debug=False, host = "0.0.0.0")
