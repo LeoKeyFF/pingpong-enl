@@ -185,6 +185,15 @@ dialog {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
+.undo-icon {
+    color: #4CAF50;
+    width: 30px;
+    height: 30px;
+    transition: transform 0.3s ease;
+}
+.undo-icon:hover{
+    transform: rotate(-5deg);
+}
 
 .tournament-container {
     max-width: 100%;

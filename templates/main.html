@@ -29,7 +29,13 @@
                 </tr>
             </table>
         </header>
-         <button class="btn btn-primary" onclick="history_cancel()" id="history_cancel">Отмена</button>
+        <!-- <button class="btn btn-primary" onclick="history_cancel()" id="history_cancel"> -->
+            <svg class="undo-icon" viewBox="0 0 24 24" fill="none" onclick="history_cancel()" id="history_cancel">
+                <path d="M7 13L4 10L7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M4 10H15C17.7614 10 20 12.2386 20 15C20 17.7614 17.7614 20 15 20H11" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        <!-- </button> -->
         <ul class="tabs" id="not_in_start">
             <li class="tab active" onclick="showPage(0)" >Верхняя сетка</li>
             <li class="tab" onclick="showPage(1)" >Нижняя сетка</li>
@@ -81,7 +87,7 @@
                 <table class="dialog-table">
                     <tr>
                         <td>
-                            <input name ="password" class="password-input" placeholder="Пароль">
+                            <input type="password" name ="password" class="password-input" placeholder="Пароль">
                         </td>
                         <td>
                             <button class="btn btn-primary" type="submit" onclick="closeAccount()" id="start" >Войти</button>

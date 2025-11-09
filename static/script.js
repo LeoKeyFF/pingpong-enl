@@ -231,7 +231,6 @@ function check_passwors(){
 
                 $("#start").prop('disabled', false);
                 $("#cleen_button").prop('disabled', false);
-                $("#history_cancel").prop('disabled', false);
 
             } else {
                 $("#acc_button").removeClass("btn btn-tertiary");
@@ -241,7 +240,6 @@ function check_passwors(){
                 $("#start").prop('disabled', true);
                 $("#cleen_button_itself").prop('disabled', true);
                 $('.player-box').on("click", function() {return false})
-                $("#history_cancel").prop('disabled', true);
             }
         },
         error: function () {
@@ -317,17 +315,19 @@ function closeAccount(){
 }
 
 function history_cancel(){
-    $.ajax({
-        type: "POST",
-        url: '/history_cancel',
-        success: function (response, status, jqXHR) {
-            updateDynamicContent()
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-        },
-        complete: function (jqXHR, textStatus) {
-        }
-    });
+    if (password_correct){
+        $.ajax({
+            type: "POST",
+            url: '/history_cancel',
+            success: function (response, status, jqXHR) {
+                updateDynamicContent()
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+            },
+            complete: function (jqXHR, textStatus) {
+            }
+        });
+    }
 }
 
 
