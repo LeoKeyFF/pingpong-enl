@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
 import database
+import argparse
 
 app = Flask(__name__)
 
@@ -119,7 +120,7 @@ def account():
 @app.route("/get_account", methods = ['GET'])
 def get_account():
     password = request.cookies.get('password')
-    right_password = "123400"
+    right_password = "12300"
     data = {
         'password_correct': password ==  right_password, 
     }
@@ -137,4 +138,13 @@ def history_cancel():
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
-    app.run(debug=False, host = "0.0.0.0")
+    parser = argparse.ArgumentParser(description="The backend for enl ping pong")
+    parser.add_argument('db_path', help='The path of the database')
+    try:
+        args = parser.parse_args()
+        database.database_path = args.db_path
+        app.run(debug=False, host = "0.0.0.0")
+    except:
+        parser.print_help()
+        database.database_path = 'local_database.db'
+        app.run(debug=False, host = "0.0.0.0")

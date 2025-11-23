@@ -2,8 +2,10 @@ import json
 import sqlite3
 import random
 
+database_path = ""
+
 def init_db():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Players (
@@ -14,7 +16,7 @@ def init_db():
 
 def add_players(name_):
     name = name_
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     [x.replace(" ", "") for x in name]
     a = f"INSERT INTO Players (Name) VALUES (\"{name}\");"
@@ -29,7 +31,7 @@ def get_players(cursor):
     return players
 
 def set_top_grid():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
 
     history = []
@@ -136,7 +138,7 @@ def set_top_grid():
 
 
 def get_from_top_grid():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM TopGrid").fetchall()))
     rounds = []
@@ -173,8 +175,51 @@ def set_winner_logic(bracket_id , winner, connection, cursor, grid, history_ = N
                 message
             )
             history.append(message)
-    else:
+        else:
+            grand_final = cursor.execute(
+                f"SELECT * FROM GrandFinal"
+            ).fetchall()
+            if len(grand_final) > 0:
+                message = f"UPDATE GrandFinal SET Player1ID = CASE WHEN Player1ID IS NULL OR Player1ID = '' THEN {winner} ELSE Player1ID END, Player2ID = CASE WHEN Player1ID IS NOT NULL AND Player1ID != '' AND (Player2ID IS NULL OR Player2ID = '') THEN {winner} ELSE Player2ID END"
+                cursor.execute(
+                    message
+                )
+                history.append(message)
+            else:
+                message = f"INSERT INTO GrandFinal (Player1ID) VALUES ({winner})"
+                cursor.execute(
+                    message
+                )
+                history.append(message)
+
+    elif grid == 1:
         message = f"UPDATE BottomGrid SET Winner = {winner} WHERE BracketID = {bracket_id}"
+        cursor.execute(
+            message
+        )
+        history.append(message)
+        max_bracket_id = cursor.execute(
+            f"SELECT MAX(BracketID) FROM BottomGrid "
+        ).fetchall()[0][0]
+        if max_bracket_id == bracket_id:
+            grand_final = cursor.execute(
+                f"SELECT * FROM GrandFinal"
+            ).fetchall()
+            if len(grand_final) > 0:
+                message = f"UPDATE GrandFinal SET Player1ID = CASE WHEN Player1ID IS NULL OR Player1ID = '' THEN {winner} ELSE Player1ID END, Player2ID = CASE WHEN Player1ID IS NOT NULL AND Player1ID != '' AND (Player2ID IS NULL OR Player2ID = '') THEN {winner} ELSE Player2ID END"
+                cursor.execute(
+                    message
+                )
+                history.append(message)
+            else:
+                message = f"INSERT INTO GrandFinal (Player1ID) VALUES ({winner})"
+                cursor.execute(
+                    message
+                )
+                history.append(message)
+
+    else:
+        message = f"UPDATE GrandFinal SET Winner = {winner}"
         cursor.execute(
             message
         )
@@ -189,7 +234,7 @@ def set_winner_logic(bracket_id , winner, connection, cursor, grid, history_ = N
     
 
 def send_winner(winner, round, grid):
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     winner_id = cursor.execute(
         f"SELECT PlayerID FROM Players WHERE Players.Name = '{winner}'"
@@ -211,7 +256,7 @@ def send_winner(winner, round, grid):
 
 
 def get_from_bottom_grid():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
 
     history = []
@@ -353,7 +398,7 @@ def get_from_bottom_grid():
 
 
 def set_bottom_grid():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
 
     history = []
@@ -401,7 +446,7 @@ def set_bottom_grid():
     connection.close()
 
 def cleen():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
 
     cursor.execute(f"DELETE FROM Players")
@@ -413,7 +458,7 @@ def cleen():
     connection.close()
 
 def create_base_tables():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
 
     cursor.execute('''
@@ -439,6 +484,11 @@ def create_base_tables():
         #   " FOREIGN KEY (Player1ID) REFERENCES Players(PlayerID), FOREIGN KEY (Winner) REFERENCES Players(PlayerID))"
         ")"
     )
+
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS GrandFinal ( BracketID INTEGER PRIMARY KEY, Player1ID INT, Player2ID INT, Winner INT)"
+    )
+
 
 
     connection.commit()
@@ -475,7 +525,7 @@ def history_cleen():
             json.dump([], file)
 
 def history_cancel():
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
  
     history_list = []
