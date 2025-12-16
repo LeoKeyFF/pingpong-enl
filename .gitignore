@@ -1,3 +1,4 @@
 __pycache__/*
 database.db
 history.json
+local_database.db

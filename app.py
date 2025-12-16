@@ -85,6 +85,20 @@ def get_data_bottom():
     }
     return jsonify(data)
 
+@app.route("/get_data_grand", methods = ['GET'])
+def get_data_grand():
+    players = database.get_from_grand_final()
+    
+
+    players = players[0]
+    players = ['' if x is None else x for x in players]
+
+    data = {
+        'players': players
+    }
+
+    print(players)
+    return jsonify(data)
 
 @app.route("/cleen", methods = ['POST'])
 def cleen():

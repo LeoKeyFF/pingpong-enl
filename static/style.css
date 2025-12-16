@@ -43,6 +43,17 @@ dialog {
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+.grid-table-final {
+  border-collapse: separate;
+  border-spacing: 25px 15px;
+  width: 100%;
+  table-layout: fixed;
+}
+.grid-table-final td {
+    text-align: center;
+    width: 100%;
+}
+
 .grid-table {
   border-collapse: separate;
   border-spacing: 25px 15px;

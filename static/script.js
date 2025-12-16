@@ -180,6 +180,88 @@ function createGridTable(id, data, div_id, grid_){
     $(div_id).append(table);
 }
 
+function grand_final_table(players){
+    local_grid = 2
+    const table = $('<table>', {
+        id: 'grandFinalTable',
+        class: 'grid-table-final'
+    });
+
+    const trhead = $('<tr>');
+    const tbody = $('<tbody>');
+
+    divHead =  $('<div>',{
+        class: 'round-header',
+        text: "Финал"
+    });
+
+    trhead.append(divHead)
+    tbody.append(trhead)
+
+    const tr = $('<tr>');
+    td = $('<td>');
+
+
+    if (players[2] == ''){
+        if (players[0] != '' && players[1] != ''  && password_correct == true){
+            divPlayerBox = $('<div>',{
+                class: 'player-box'
+            }).on("click", function() {openChooseWinner(0 ,players[0], players[1], local_grid)}); 
+        }
+        else{
+            divPlayerBox = $('<div>',{
+                class: 'player-box'
+            }); 
+        }                    
+        divRow1 = $('<div>',{
+            class: 'player-name',
+            text: players[0]
+        });
+        divRow2 = $('<div>',{
+            class: 'player-name',
+            text: players[1]
+        });
+        divPlayerBox.append(divRow1)
+        divPlayerBox.append($('<hr>'))
+        divPlayerBox.append(divRow2)
+        td.append(divPlayerBox);
+    }
+    else{
+        if (players[0] ==  players[2]){
+            divRow1 = $('<div>',{
+                class: 'player-name-winner',
+                text: players[0]
+            });
+            divRow2 = $('<div>', {
+                class: 'player-name',
+                text: players[1]
+            });
+        }
+        else{
+            divRow1 = $('<div>', {
+                class: 'player-name',
+                text: players[0]
+            });
+            divRow2 = $('<div>',{
+                class: 'player-name-winner',
+                text: players[1]
+            });
+        }
+        divPlayerBox = $('<div>',{
+            class: 'player-box'
+        }); 
+
+        divPlayerBox.append(divRow1)
+        divPlayerBox.append($('<hr>'))
+        divPlayerBox.append(divRow2)
+        td.append(divPlayerBox);
+    }
+    tr.append(td)
+    tbody.append(tr);   
+    table.append(tbody);
+    $('#grand_final_page').append(table);
+}
+
 function updateDynamicContent() {
     check_passwors()
     $.ajax({
@@ -210,6 +292,20 @@ function updateDynamicContent() {
         success: function (data) {
             $('#bottomGridTable').remove();
             createGridTable(id='bottomGridTable', data = data, div_id = '#bottomgrid', grid_ = '1');
+        },
+        error: function () {
+            console.error('Error fetching data.');
+        }
+    });
+
+    $.ajax({
+        url: '/get_data_grand',  // Flask route URL
+        method: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            $('#grandFinalTable').remove();
+            
+            grand_final_table(data.players)
         },
         error: function () {
             console.error('Error fetching data.');
@@ -253,6 +349,7 @@ function showPage(page) {
         $("#bottom_grid_page").css("display", "none");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "block");
+        $("#grand_final_page").css("display", "none");
         $("#history_cancel").css("display", "block");
         
     } 
@@ -260,9 +357,17 @@ function showPage(page) {
         $("#bottom_grid_page").css("display", "block");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "none");
+        $("#grand_final_page").css("display", "none");
         $("#history_cancel").css("display", "block");
         
     } 
+    else if (page == 2){
+        $("#bottom_grid_page").css("display", "none");
+        $("#add_players_page").css("display", "none");
+        $("#top_grid_page").css("display", "none");
+        $("#grand_final_page").css("display", "block");
+        $("#history_cancel").css("display", "block");
+    }
     $('.tab').removeClass('active');
     $('.tab').eq(page).addClass('active')
 

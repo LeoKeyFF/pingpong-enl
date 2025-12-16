@@ -39,6 +39,7 @@
         <ul class="tabs" id="not_in_start">
             <li class="tab active" onclick="showPage(0)" >Верхняя сетка</li>
             <li class="tab" onclick="showPage(1)" >Нижняя сетка</li>
+            <li class="tab" onclick="showPage(2)" >Гранд-финал</li>
         </ul>
         <div class="input-section" id="add_players_page">
             <label>Введите участников турнира через запятую:</label>
@@ -59,6 +60,10 @@
 
         <div class="tournament-container" id="bottom_grid_page">
             <div id="bottomgrid" class="tournament-grid"></div>
+        </div>
+
+        <div class="tournament-container" id="grand_final_page">
+            <!-- <div id="grandfinal" class="tournament-grid"></div> -->
         </div>
 
         <form action="/cleen" method="POST" id="cleen_button">

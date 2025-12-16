@@ -219,6 +219,8 @@ def set_winner_logic(bracket_id , winner, connection, cursor, grid, history_ = N
                 history.append(message)
 
     else:
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        print(grid)
         message = f"UPDATE GrandFinal SET Winner = {winner}"
         cursor.execute(
             message
@@ -244,7 +246,7 @@ def send_winner(winner, round, grid):
         bracket_id = cursor.execute(
             f"SELECT BracketID FROM TopGrid WHERE RoundNumber = {int(round)} AND (Player1ID = {winner_id} OR Player2ID = {winner_id})"
         ).fetchall()[0][0]
-    else:
+    elif (grid == 1):
         bracket_id = cursor.execute(
         f"SELECT BracketID FROM BottomGrid WHERE RoundNumber = {round} AND (Player1ID = {winner_id} OR Player2ID = {winner_id})"
         ).fetchall()[0][0]
@@ -452,6 +454,7 @@ def cleen():
     cursor.execute(f"DELETE FROM Players")
     cursor.execute(f"DELETE FROM TopGrid")
     cursor.execute(f"DELETE FROM BottomGrid")
+    cursor.execute(f"DELETE FROM GrandFinal")
     history_cleen()
 
     connection.commit()
@@ -540,7 +543,8 @@ def history_cancel():
 
         cursor.execute(f"DELETE FROM TopGrid")
         cursor.execute(f"DELETE FROM BottomGrid")
-
+        cursor.execute(f"DELETE FROM GrandFinal")
+        
         for h in history_list:
             if len(h) > 0:
                 for message in h:
@@ -551,3 +555,25 @@ def history_cancel():
 
     connection.commit()
     connection.close()
+
+
+def get_from_grand_final():
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+    rounds_ = list(set(cursor.execute(f"SELECT RoundNumber FROM TopGrid").fetchall()))
+    rounds = []
+    for r in rounds_:
+        if r[0] not in rounds:
+            rounds.append(r[0])
+    rounds.sort(reverse= True)
+    players = cursor.execute('''
+        SELECT 
+            p1.Name, p2.Name, pw.Name
+        FROM GrandFinal g
+        LEFT JOIN Players p1 ON g.Player1ID = p1.PlayerID
+        LEFT JOIN Players p2 ON g.Player2ID = p2.PlayerID
+        LEFT JOIN Players pw ON g.Winner = pw.PlayerID;
+       '''
+    ).fetchall()
+    connection.close()
+    return players
