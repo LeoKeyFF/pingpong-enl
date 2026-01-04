@@ -455,6 +455,7 @@ def cleen():
     cursor.execute(f"DELETE FROM TopGrid")
     cursor.execute(f"DELETE FROM BottomGrid")
     cursor.execute(f"DELETE FROM GrandFinal")
+    cursor.execute(f"DELETE FROM Password")
     history_cleen()
 
     connection.commit()
@@ -490,6 +491,10 @@ def create_base_tables():
 
     cursor.execute(
         f"CREATE TABLE IF NOT EXISTS GrandFinal ( BracketID INTEGER PRIMARY KEY, Player1ID INT, Player2ID INT, Winner INT)"
+    )
+
+    cursor.execute(
+        f"CREATE TABLE IF NOT EXISTS Password ( Password NVARCHAR(255))"
     )
 
 
@@ -577,3 +582,31 @@ def get_from_grand_final():
     ).fetchall()
     connection.close()
     return players
+
+def set_password(password):
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+    cursor.execute(f"INSERT INTO Password (Password) VALUES (\"{password}\")")
+
+    connection.commit()
+    connection.close()
+
+def get_password():
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+    password = ""
+    try:
+        password = cursor.execute(f"SELECT Password FROM Password").fetchall()[0][0]
+    except:
+        password = "no password found"
+    return password
+
+def change_password(password):
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+
+    cursor.execute(f"DELETE FROM Password")
+    cursor.execute(f"INSERT INTO Password (Password) VALUES (\"{password}\")")
+
+    connection.commit()
+    connection.close()

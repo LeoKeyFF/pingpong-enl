@@ -277,6 +277,8 @@ function updateDynamicContent() {
                 $("#not_in_start").css("display", "none");
                 $("#cleen_button").css("display", "none");
                 $("#history_cancel").css("display", "none");
+                $("#acc_button").css("display", "none");
+                $("#menu_page").css("display", "none");
             }
             createGridTable(id='topGridTable', data = data, div_id = '#topgrid', grid_ = '0');
         },
@@ -311,6 +313,8 @@ function updateDynamicContent() {
             console.error('Error fetching data.');
         }
     });
+
+    
 }
 
 function check_passwors(){
@@ -325,17 +329,25 @@ function check_passwors(){
                 $("#acc_button").removeClass("btn btn-primary");
                 $("#acc_button").addClass("btn btn-tertiary");
 
-                $("#start").prop('disabled', false);
-                $("#cleen_button").prop('disabled', false);
+                $("#cleen_button_itself").prop('disabled', false);
+                $("#change_password_btn").prop('disabled', false);
+
+                $("#cleen_button_itself").css("display", "block");
+                $("#change_password_btn").css("display", "block");
+                $("#history_cancel").css("display", "block");
 
             } else {
                 $("#acc_button").removeClass("btn btn-tertiary");
                 $("#acc_button").addClass("btn btn-primary");
                 $("#acc_button").text("Войти");
 
-                $("#start").prop('disabled', true);
                 $("#cleen_button_itself").prop('disabled', true);
+                $("#change_password_btn").prop('disabled', true);
                 $('.player-box').on("click", function() {return false})
+
+                $("#cleen_button_itself").css("display", "none");
+                $("#change_password_btn").css("display", "none");
+                $("#history_cancel").css("display", "none");
             }
         },
         error: function () {
@@ -346,27 +358,36 @@ function check_passwors(){
 
 function showPage(page) {
     if (page == 0){
+        $("#menu_page").css("display", "block");
+        $("#bottom_grid_page").css("display", "none");
+        $("#add_players_page").css("display", "none");
+        $("#top_grid_page").css("display", "none");
+        $("#grand_final_page").css("display", "none");
+        $("#acc_button").css("display", "inline");
+     } 
+    else if (page == 1){
+        $("#menu_page").css("display", "none");
         $("#bottom_grid_page").css("display", "none");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "block");
         $("#grand_final_page").css("display", "none");
-        $("#history_cancel").css("display", "block");
-        
+        $("#acc_button").css("display", "inline"); 
     } 
-    else if (page == 1){
+    else if (page == 2){
+        $("#menu_page").css("display", "none");
         $("#bottom_grid_page").css("display", "block");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "none");
         $("#grand_final_page").css("display", "none");
-        $("#history_cancel").css("display", "block");
-        
-    } 
-    else if (page == 2){
+        $("#acc_button").css("display", "inline");
+    }
+    else if (page == 3){
+        $("#menu_page").css("display", "none");
         $("#bottom_grid_page").css("display", "none");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "none");
         $("#grand_final_page").css("display", "block");
-        $("#history_cancel").css("display", "block");
+        $("#acc_button").css("display", "inline");
     }
     $('.tab').removeClass('active');
     $('.tab').eq(page).addClass('active')
@@ -435,6 +456,20 @@ function history_cancel(){
     }
 }
 
+function openChangePasswordDialog(){
+    const dialog = document.getElementById("change_password_dialog");
+    dialog.showModal(); 
+    dialog.addEventListener('click', function (e) {
+        if (e.target === this) {
+            this.close();
+        }
+    });
+}
+
+function closeChangePasswordDialog(){
+    const dialog = document.getElementById("change_password_dialog");
+    dialog.close();
+}
 
 
 

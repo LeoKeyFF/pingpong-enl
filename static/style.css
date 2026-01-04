@@ -15,22 +15,35 @@ body {
 .header{
     height: 70px;
     display: flex;
-    /* align-items: center;
-    justify-content: center; */
     position: relative;
     overflow: hidden;
 }
-.header-content {
-    display: inline-flex;
+.head-div {
+    display: flex;
+    align-content: center;
+    align-items: center;
     text-align: center;
-    z-index: 1;
+    height: 65px;
 }
-.header-text {
-    font-size: 150%;
-    background: linear-gradient(135deg, #4CAF50, #45a049);
+.icon-img {
+    flex-grow: 0;
+    height: 80%;
+    aspect-ratio: 1;
+    margin-right: 15px;
+    margin-left: 5px;
+    align-self: center;
+}
+
+.div-img-title {
+    flex-grow: 1;
     text-align: start;
-    background-clip: text;
-    color: transparent;
+}
+
+.title-img {
+    flex-grow: 0;
+    height:40px;
+    width: 252px;
+    align-self: center;
 }
 
 dialog {
@@ -43,6 +56,7 @@ dialog {
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 .grid-table-final {
   border-collapse: separate;
   border-spacing: 25px 15px;
@@ -53,26 +67,16 @@ dialog {
     text-align: center;
     width: 100%;
 }
-
 .grid-table {
   border-collapse: separate;
   border-spacing: 25px 15px;
   width: 230px;
   table-layout: fixed;
 }
-
 .grid-table th,
 .grid-table td {
     text-align: center;
     width: 230px;
-}
-
-.head-table{
-    width: 100%;
-    table-layout: fixed;
-}
-.head-table td {
-    text-align: end; 
 }
 
 .dialog-table{
@@ -111,6 +115,7 @@ dialog {
     display: flex;
     gap: 15px;
     margin-bottom: 15px;
+    margin-top: 5px;
     flex-wrap: wrap;
 }
 
@@ -120,7 +125,7 @@ dialog {
     padding: 12px 15px;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.8rem;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
 }
@@ -138,7 +143,7 @@ dialog {
     margin-right: 10px;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.8rem;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
 }
@@ -156,10 +161,10 @@ dialog {
 }
 
 .btn {
-    padding: 12px 25px;
+    padding: 12px 18px;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -196,10 +201,21 @@ dialog {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
+
+.mn {
+    width: 45vw
+}
+.mn-div-element {
+    margin-bottom: 5px;
+}
+
 .undo-icon {
+    align-self: center;
     color: #4CAF50;
     width: 30px;
     height: 30px;
+    flex-grow: 0;
+    margin-right: 5px;
     transition: transform 0.3s ease;
 }
 .undo-icon:hover{
@@ -263,7 +279,7 @@ dialog {
 .player-name {
     align-self: center;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     margin-bottom: 5px;
 }
 
@@ -271,14 +287,10 @@ dialog {
     align-self: center;
     font-weight: bold;
     color: #4CAF50;
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     margin-bottom: 5px;
 }
 
-.player-info {
-    font-size: 0.9rem;
-    color: #666;
-}
 
 .tabs {
     display: flex;
@@ -287,12 +299,16 @@ dialog {
     margin: 0;
 }
 .tab {
-    padding: 10px 20px;
+    text-align: center;
+    align-content: center;
+    padding: 10px 2px;
     cursor: pointer;
-    width: 50%;
+    height: 45px;
+    width: 33.3%;
     border-bottom: none;
-    margin: 5px;
+    margin: 5px 2px;
     border-radius: 12px;
+    font-size: 0.8rem;
     background: rgba(255, 255, 255, 0.05);
 }
 
@@ -300,25 +316,21 @@ dialog {
     background: linear-gradient(135deg, #2196F3, #0b7dda);
 }
 
-.round-1-8 .player-box {
-    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+.tab.menu {
+    height: 45px;
+    width: 45px;
+    flex-grow: 0;
+    border-radius: 50%;
+}
+.pages_nav {
+    display: flex;
+    flex-grow: 1;
 }
 
-.round-1-4 .player-box {
-    background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
-}
-
-.round-1-2 .player-box {
-    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-}
-
-.round-final .player-box {
-    background: linear-gradient(135deg, #ffebee, #ffcdd2);
-}
-
-.champion-box {
-    background: linear-gradient(135deg, #fff9c4, #f57f17) !important;
-    border: 3px solid #ff9800 !important;
+.menu_div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Адаптивность для мобильных устройств */
@@ -326,6 +338,23 @@ dialog {
     body {
         padding: 10px;
     }
+    .header-text {
+    font-size: 1.5rem;
+    }
+
+    .icon-img {
+        flex-grow: 0;
+        height: 75%;
+        aspect-ratio: 1;
+        margin-right: 15px;
+        margin-left: 5px;
+        align-self: center;
+    }
+    .title-img {
+        height:35px;
+        width: 221px;
+    }
+
 
     .tournament-header h1 {
         font-size: 2rem;
@@ -333,10 +362,6 @@ dialog {
 
     .input-group {
         flex-direction: column;
-    }
-
-    .player-input {
-        min-width: 100%;
     }
 
     .button-group {
@@ -359,12 +384,9 @@ dialog {
     }
 
     .player-name {
-        font-size: 1rem;
-    }
-
-    .player-info {
         font-size: 0.8rem;
     }
+
 }
 
 @media (max-width: 480px) {

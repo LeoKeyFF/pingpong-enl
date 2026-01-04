@@ -12,40 +12,55 @@
         document.addEventListener("DOMContentLoaded", function() {
             createDatabaseTables();
             updateDynamicContent()
-            showPage(0);
+            showPage(1);
             setInterval(function() {updateDynamicContent();}, 5000)
         });
     </script>
     <div class="container">
-        <header class = "header">
-            <table class="head-table">
-                <tr>
-                    <td>
-                        <h1 class="header-text">ЕНЛ — Ping Pong</h1>
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" onclick="openAccDialog()" id="acc_button"></button>
-                    </td>
-                </tr>
-            </table>
-        </header>
-        <!-- <button class="btn btn-primary" onclick="history_cancel()" id="history_cancel"> -->
-            <svg class="undo-icon" viewBox="0 0 24 24" fill="none" onclick="history_cancel()" id="history_cancel">
+        <div class="head-div">
+            <img src="{{ url_for('static', filename='pictures/icon.png') }}" alt="icon" class="icon-img">
+            <div class="div-img-title">
+                <img src="{{ url_for('static', filename='pictures/title.png') }}" alt="icon" class="title-img">
+            </div>
+            <!-- <h1 class="header-text">ЕНЛ — Ping Pong</h1> -->
+            <svg class="undo-icon" viewBox="0 0 24 24" fill="none" onclick="history_cancel()" id="history_cancel" style="display: none;">
                 <path d="M7 13L4 10L7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 <path d="M4 10H15C17.7614 10 20 12.2386 20 15C20 17.7614 17.7614 20 15 20H11" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-        <!-- </button> -->
+        </div>
         <ul class="tabs" id="not_in_start">
-            <li class="tab active" onclick="showPage(0)" >Верхняя сетка</li>
-            <li class="tab" onclick="showPage(1)" >Нижняя сетка</li>
-            <li class="tab" onclick="showPage(2)" >Гранд-финал</li>
+            <li class="tab menu" onclick="showPage(0)" >☰</li>
+            <div class="pages_nav">
+                <li class="tab active" onclick="showPage(1)" >Верхняя сетка</li>
+                <li class="tab" onclick="showPage(2)" >Нижняя сетка</li>
+                <li class="tab" onclick="showPage(3)" >Гранд-финал</li>
+            </div>
         </ul>
+
+        <div class="tournament-container" id="menu_page">
+            <div class = "menu_div">
+                <label class="mn-div-element" >Меню:</label>
+                <button class="btn btn-primary mn-div-element" onclick="openAccDialog()" id="acc_button"></button>
+                <button class="btn btn-secondary mn mn-div-element" onclick="openChangePasswordDialog()" id="change_password_btn">Сменить пароль</button>
+                <form action="/cleen" method="POST" id="cleen_button">
+                    <button type="submit" class="btn btn-secondary mn mn-div-element" id="cleen_button_itself">Очистить</button>
+                </form>
+            </div>
+        </div>
+
         <div class="input-section" id="add_players_page">
             <label>Введите участников турнира через запятую:</label>
             <form action="/start_tour" method="POST">
                 <div class="input-group">
                     <input name ="names" class="player-input" placeholder="Игроки">
+                </div>
+                <label>Придумайте пароль, для управления турниром:</label>
+                <div class="input-group">
+                    <input type="password" name ="new_password" class="player-input" placeholder="Введите пароль">
+                </div>
+                <div class="input-group">
+                    <input type="password" name ="new_password_two" class="player-input" placeholder="Повторите пароль">
                 </div>
                 <div class="button-group">
                     <button class="btn btn-primary" type="submit" onclick="showPage(0)" id="start" >Начать турнир</button>
@@ -63,12 +78,7 @@
         </div>
 
         <div class="tournament-container" id="grand_final_page">
-            <!-- <div id="grandfinal" class="tournament-grid"></div> -->
         </div>
-
-        <form action="/cleen" method="POST" id="cleen_button">
-            <button type="submit" class="btn btn-secondary" id="cleen_button_itself">Очистить</button>
-        </form>
 
     </div>
     <dialog id="chooseWinner" aria-modal="true" >
@@ -97,6 +107,29 @@
                         <td>
                             <button class="btn btn-primary" type="submit" onclick="closeAccount()" id="start" >Войти</button>
                         </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </dialog>
+
+    <dialog id="change_password_dialog" aria-modal="true" >
+        <h2 id="heading">Сменить пароля:</h2>
+        <div display = "flex">
+            <form action="/change_password" method="POST">
+                <table class="dialog-table">
+                    <tr>
+                        <td>
+                            <input type="password" name ="change_psswd_new_password" class="password-input" placeholder="Новый пароль" id="chng_pswd_1">
+                        </td>
+                        <td rowspan="2">
+                            <button class="btn btn-primary" type="submit" onclick="closeChangePasswordDialog()">Сменить</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="password" name ="change_psswd_new_password_two" class="password-input" placeholder="Ещё раз"  id="chng_pswd_2">
+                        </td> 
                     </tr>
                 </table>
             </form>

@@ -10,13 +10,20 @@ def home():
 
 @app.route("/start_tour", methods = ['POST'])
 def start_tour():
+    #Password
+    password = request.form['new_password']
+    password_two = request.form['new_password_two']
+    
     # Players
     names = request.form['names']
-    if names and len(names) != 0 and len(names.split(",")) < 129:
+    if names and len(names) != 0 and len(names.split(",")) < 129 and password == password_two:
         names = names.split(",")
         for name in names:
             database.add_players(name)
     
+        #Password
+        database.set_password(password)
+
         #Top Grid
         database.set_top_grid()
 
@@ -88,16 +95,17 @@ def get_data_bottom():
 @app.route("/get_data_grand", methods = ['GET'])
 def get_data_grand():
     players = database.get_from_grand_final()
-    
+    if len(players) > 0:
+        players = players[0]
+        players = ['' if x is None else x for x in players]
 
-    players = players[0]
-    players = ['' if x is None else x for x in players]
-
-    data = {
-        'players': players
-    }
-
-    print(players)
+        data = {
+            'players': players
+        }
+    else:
+        data = {
+            'players': []
+        }
     return jsonify(data)
 
 @app.route("/cleen", methods = ['POST'])
@@ -134,7 +142,7 @@ def account():
 @app.route("/get_account", methods = ['GET'])
 def get_account():
     password = request.cookies.get('password')
-    right_password = "12300"
+    right_password = database.get_password()
     data = {
         'password_correct': password ==  right_password, 
     }
@@ -149,6 +157,17 @@ def cleen_password():
 @app.route("/history_cancel", methods = ['POST'])
 def history_cancel():
     database.history_cancel()
+    return redirect(url_for('home'))
+
+@app.route("/change_password", methods = ['POST'])
+def change_password():
+    password = request.form['change_psswd_new_password']
+    password_two = request.form['change_psswd_new_password_two']
+
+    
+    if password_two == password and len(password) > 0:
+        database.change_password(password)
+
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
