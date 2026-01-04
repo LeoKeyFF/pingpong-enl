@@ -306,15 +306,15 @@ function updateDynamicContent() {
         dataType: 'json',
         success: function (data) {
             $('#grandFinalTable').remove();
+            $('#topPlayers').remove();
             
             grand_final_table(data.players)
+            top_players(data.top)
         },
         error: function () {
             console.error('Error fetching data.');
         }
     });
-
-    
 }
 
 function check_passwors(){
@@ -472,7 +472,51 @@ function closeChangePasswordDialog(){
 }
 
 
+function top_players(top){
+    const divTop =  $('<div>',{
+        id: 'topPlayers',
+        class: 'top-div'
+    });
+    const divTopElement1 = $('<div>',{
+        class: 'top-div-element'
+    });
 
+    const divTopElement2 = $('<div>',{
+        class: 'top-div-element'
+    });
+
+    const divTopElement3 = $('<div>',{
+        class: 'top-div-element'
+    });
+
+    const divPlayer1 = $('<div>',{
+        class: 'top-player',
+        text: top[0]
+    });
+
+    const divPlayer2 = $('<div>',{
+        class: 'top-player',
+        text: top[1]
+    });
+
+    const divPlayer3 = $('<div>',{
+        class: 'top-player',
+        text: top[2]
+    });
+
+    divTopElement1.append(divPlayer1)
+    divTopElement2.append(divPlayer2)
+    divTopElement3.append(divPlayer3)
+
+    divTop.append(divTopElement1)
+    divTop.append(divTopElement2)
+    divTop.append(divTopElement3)
+
+    $('#grand_final_page').append(divTop);
+
+    $("#acc_button").text("Выйти");
+
+}
 
 
 

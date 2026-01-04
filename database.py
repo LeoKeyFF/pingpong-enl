@@ -219,8 +219,6 @@ def set_winner_logic(bracket_id , winner, connection, cursor, grid, history_ = N
                 history.append(message)
 
     else:
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        print(grid)
         message = f"UPDATE GrandFinal SET Winner = {winner}"
         cursor.execute(
             message
@@ -582,6 +580,34 @@ def get_from_grand_final():
     ).fetchall()
     connection.close()
     return players
+
+def get_top_players():
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+    top = list()
+    top_indexes = list()
+    players = cursor.execute(f"SELECT Player1ID,  Player2ID, Winner FROM GrandFinal").fetchall()
+    
+    if len(players) > 0:
+        players = players[0]
+    else:
+        return top
+    
+    if players[2] != None:
+        top_indexes.append(players[2])
+        if players[2] == players[0]:
+            top_indexes.append(players[1])
+        else:
+            top_indexes.append(players[0])
+        
+        top_indexes.append(cursor.execute(f"SELECT CASE WHEN Winner != Player1ID THEN Player1ID ELSE Player2ID END FROM BottomGrid WHERE RoundNumber = 1").fetchall()[0][0])
+
+    for player in top_indexes:
+        player_name = cursor.execute(f"SELECT Name FROM Players WHERE PlayerID = {player}").fetchall()[0][0]
+        top.append(player_name)
+    print(top)
+    return top
+
 
 def set_password(password):
     connection = sqlite3.connect(database_path)
