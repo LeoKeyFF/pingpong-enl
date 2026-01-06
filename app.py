@@ -140,7 +140,7 @@ def create_base_tables():
 def account():
     password = request.form['password']
     resp = make_response(redirect(url_for('home')))
-    resp.set_cookie('password', password, max_age=300)
+    resp.set_cookie('password', password, max_age=900)
     return resp
 
 @app.route("/get_account", methods = ['GET'])

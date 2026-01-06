@@ -3,6 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ЕНЛ ping-pong</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='pictures/favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
@@ -23,13 +24,14 @@
         <span></span>
     </button>
     <aside class="side-menu" id="sideMenu">
+        <img src="{{ url_for('static', filename='pictures/icon_balls.png') }}" alt="icon_balls" class="menu-img-icon">
         <div class="menu-header">Меню</div>
         <nav class="menu-nav">
             <button class="btn btn-primary mn-div-element" onclick="openAccDialog()" id="acc_button"></button>
             <button class="btn btn-secondary mn mn-div-element" onclick="openChangePasswordDialog()" id="change_password_btn">Сменить пароль</button>
-            <form action="/cleen" method="POST" id="cleen_button">
-                <button type="submit" class="btn btn-secondary mn mn-div-element" id="cleen_button_itself">Очистить</button>
-            </form>
+            <!-- <form action="/cleen" method="POST" id="cleen_button"> -->
+            <button type="submit" class="btn btn-secondary mn mn-div-element" id="cleen_button_itself" onclick="openConfCleen()">Очистить</button>
+            <!-- </form> -->
         </nav>
     </aside>  
 
@@ -120,7 +122,7 @@
     </dialog>
 
     <dialog id="change_password_dialog" aria-modal="true" >
-        <h2 id="heading">Сменить пароля:</h2>
+        <h2 id="heading">Сменить пароль:</h2>
         <div display = "flex">
             <form action="/change_password" method="POST">
                 <table class="dialog-table">
@@ -139,6 +141,24 @@
                     </tr>
                 </table>
             </form>
+        </div>
+    </dialog>
+
+    <dialog id="confirm_cleen" aria-modal="true" >
+        <h2 id="heading">Вы уверены, что хотите всё очистить?</h2>
+        <div display = "flex">
+            <table class="dialog-table">
+                <tr>
+                    <td>
+                        <button class="btn btn-secondary" type="submit" onclick="closeConfCleen()" id="start" >Нет</button>
+                    </td>
+                    <td>
+                        <form action="/cleen" method="POST" id="cleen_button">
+                            <button class="btn btn-secondary" type="submit" onclick="closeConfCleen()" id="start" >Да</button>
+                        </form>
+                    </td>
+                </tr>
+            </table>
         </div>
     </dialog>
 

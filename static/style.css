@@ -407,12 +407,15 @@ dialog {
     right: -40%;
     width: 40%;
     height: 100vh;
-    background-color: #446297ff;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
     color: white;
     z-index: 2;
     transition: right 0.3s ease;
     padding: 80px 20px 20px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .menu-open body {
@@ -424,6 +427,7 @@ dialog {
 }
 
 .menu-header {
+    width: 100%;
     margin-bottom: 30px;
     font-size: 1.5rem;
     font-weight: 600;
@@ -460,6 +464,12 @@ dialog {
     visibility: visible;
 }
 
+.menu-img-icon {
+    align-self: center;
+    margin-bottom: 40px;
+    width: 90px;
+    aspect-ratio: 1;
+}
  
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {

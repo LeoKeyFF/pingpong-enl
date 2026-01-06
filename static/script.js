@@ -309,7 +309,10 @@ function updateDynamicContent() {
             $('#topPlayers').remove();
             
             grand_final_table(data.players)
-            top_players(data.top)
+            if (data.top.length > 0) {
+                top_players(data.top)
+            }
+            
         },
         error: function () {
             console.error('Error fetching data.');
@@ -572,6 +575,19 @@ function openMenu() {
 };
 
 
+function openConfCleen() {
+    const dialog = document.getElementById("confirm_cleen");
+    dialog.showModal(); 
+    dialog.addEventListener('click', function (e) {
+        if (e.target === this) {
+            this.close();
+        }
+    });
+}
 
+function closeConfCleen() {
+    const dialog = document.getElementById("confirm_cleen");
+    dialog.close(); 
+}
 
 
