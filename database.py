@@ -605,7 +605,6 @@ def get_top_players():
     for player in top_indexes:
         player_name = cursor.execute(f"SELECT Name FROM Players WHERE PlayerID = {player}").fetchall()[0][0]
         top.append(player_name)
-    print(top)
     return top
 
 
