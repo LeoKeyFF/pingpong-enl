@@ -278,7 +278,7 @@ function updateDynamicContent() {
                 $("#cleen_button").css("display", "none");
                 $("#history_cancel").css("display", "none");
                 $("#acc_button").css("display", "none");
-                $("#menu_page").css("display", "none");
+                $("#menuToggle").css("display", "none");
             }
             createGridTable(id='topGridTable', data = data, div_id = '#topgrid', grid_ = '0');
         },
@@ -337,9 +337,10 @@ function check_passwors(){
                 $("#history_cancel").css("display", "block");
 
             } else {
+                $("#acc_button").text("Войти");
                 $("#acc_button").removeClass("btn btn-tertiary");
                 $("#acc_button").addClass("btn btn-primary");
-                $("#acc_button").text("Войти");
+                
 
                 $("#cleen_button_itself").prop('disabled', true);
                 $("#change_password_btn").prop('disabled', true);
@@ -357,37 +358,30 @@ function check_passwors(){
 }
 
 function showPage(page) {
+
     if (page == 0){
-        $("#menu_page").css("display", "block");
-        $("#bottom_grid_page").css("display", "none");
-        $("#add_players_page").css("display", "none");
-        $("#top_grid_page").css("display", "none");
-        $("#grand_final_page").css("display", "none");
-        $("#acc_button").css("display", "inline");
-     } 
-    else if (page == 1){
-        $("#menu_page").css("display", "none");
         $("#bottom_grid_page").css("display", "none");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "block");
         $("#grand_final_page").css("display", "none");
         $("#acc_button").css("display", "inline"); 
+        $("#menuToggle").css("display", "flex");
     } 
-    else if (page == 2){
-        $("#menu_page").css("display", "none");
+    else if (page == 1){
         $("#bottom_grid_page").css("display", "block");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "none");
         $("#grand_final_page").css("display", "none");
         $("#acc_button").css("display", "inline");
+        $("#menuToggle").css("display", "flex");
     }
-    else if (page == 3){
-        $("#menu_page").css("display", "none");
+    else if (page == 2){
         $("#bottom_grid_page").css("display", "none");
         $("#add_players_page").css("display", "none");
         $("#top_grid_page").css("display", "none");
         $("#grand_final_page").css("display", "block");
         $("#acc_button").css("display", "inline");
+        $("#menuToggle").css("display", "flex");
     }
     $('.tab').removeClass('active');
     $('.tab').eq(page).addClass('active')
@@ -473,21 +467,6 @@ function closeChangePasswordDialog(){
 
 
 function top_players(top){
-    const divTop =  $('<div>',{
-        id: 'topPlayers',
-        class: 'top-div'
-    });
-    const divTopElement1 = $('<div>',{
-        class: 'top-div-element'
-    });
-
-    const divTopElement2 = $('<div>',{
-        class: 'top-div-element'
-    });
-
-    const divTopElement3 = $('<div>',{
-        class: 'top-div-element'
-    });
 
     const divPlayer1 = $('<div>',{
         class: 'top-player',
@@ -504,20 +483,93 @@ function top_players(top){
         text: top[2]
     });
 
-    divTopElement1.append(divPlayer1)
-    divTopElement2.append(divPlayer2)
-    divTopElement3.append(divPlayer3)
+    const gold = $('<img>',{
+        class: 'megal-img',
+        src: '/static/pictures/medal_gold.png',
+        alt: 'gold'
+    });
 
-    divTop.append(divTopElement1)
-    divTop.append(divTopElement2)
-    divTop.append(divTopElement3)
+    const silver = $('<img>',{
+        class: 'megal-img',
+        src: '/static/pictures/medal_silver.png',
+        alt: 'silver'
+    });
 
-    $('#grand_final_page').append(divTop);
+    const bronse = $('<img>',{
+        class: 'megal-img',
+        src: '/static/pictures/medal_bronse.png',
+        alt: 'bronse'
+    });
 
-    $("#acc_button").text("Выйти");
+    const text_lable = 'Поздравляем победителя и призёров турнира!'
+    const lable = $('<lable>',{
+        text: text_lable,
+        class: 'top-div-element top-lable'
+    });
+
+    const place1 = $('<lable>',{
+        text: 'Первое место:',
+        class: 'top-place'
+    });
+    const place2 = $('<lable>',{
+        text: 'Второе место:',
+        class: 'top-place'
+    });
+    const place3 = $('<lable>',{
+        text: 'Третье место:',
+        class: 'top-place'
+    });
+
+    const table = $('<table>', {
+        class: 'top-table',
+        id: 'topPlayers'
+    })
+    table.append(
+        $('<tr>', {class: 'table-lable-row'}).append(
+            $('<td>', {class: 'table-lable-td', colspan: 3, text: text_lable})
+        )
+    )
+    table.append(
+        $('<tr>').append(
+            $('<td>', {class: 'big'}).append(place1)
+        ).append(
+            $('<td>', {class: 'small'}).append(divPlayer1)
+        ).append(
+            $('<td>', {class: 'big'}).append(gold)
+        )
+    )
+    table.append(
+        $('<tr>').append(
+            $('<td>', {class: 'big'}).append(place2)
+        ).append(
+            $('<td>', {class: 'small'}).append(divPlayer2)
+        ).append(
+            $('<td>', {class: 'big'}).append(silver)
+        )
+    )
+    table.append(
+        $('<tr>').append(
+            $('<td>', {class: 'big'}).append(place3)
+        ).append(
+            $('<td>', {class: 'small'}).append(divPlayer3)
+        ).append(
+            $('<td>', {class: 'big'}).append(bronse)
+        )
+    )
+    $('#grand_final_page').append(table);
 
 }
 
+function openMenu() {
+    const body = $('body');
+    body.toggleClass('menu-open');
+
+    $(document).on('keydown', function(event) {
+        if (event.key === 'Escape' && body.hasClass('menu-open')) {
+            body.toggleClass('menu-open');
+        }
+    });
+};
 
 
 

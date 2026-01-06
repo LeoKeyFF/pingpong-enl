@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ЕНЛ-PingPong</title>
+    <title>ЕНЛ ping-pong</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery-3.7.1.min.js') }}"></script>
@@ -12,42 +12,47 @@
         document.addEventListener("DOMContentLoaded", function() {
             createDatabaseTables();
             updateDynamicContent()
-            showPage(1);
+            showPage(0);
             setInterval(function() {updateDynamicContent();}, 5000)
         });
     </script>
+
+    <button class="btn btn-primary menu-button" id="menuToggle" onclick="openMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <aside class="side-menu" id="sideMenu">
+        <div class="menu-header">Меню</div>
+        <nav class="menu-nav">
+            <button class="btn btn-primary mn-div-element" onclick="openAccDialog()" id="acc_button"></button>
+            <button class="btn btn-secondary mn mn-div-element" onclick="openChangePasswordDialog()" id="change_password_btn">Сменить пароль</button>
+            <form action="/cleen" method="POST" id="cleen_button">
+                <button type="submit" class="btn btn-secondary mn mn-div-element" id="cleen_button_itself">Очистить</button>
+            </form>
+        </nav>
+    </aside>  
+
     <div class="container">
         <div class="head-div">
-            <img src="{{ url_for('static', filename='pictures/icon.png') }}" alt="icon" class="icon-img">
+            <!-- <img src="{{ url_for('static', filename='pictures/icon.png') }}" alt="icon" class="icon-img"> -->
             <div class="div-img-title">
                 <img src="{{ url_for('static', filename='pictures/title.png') }}" alt="icon" class="title-img">
             </div>
-            <!-- <h1 class="header-text">ЕНЛ — Ping Pong</h1> -->
+       
+        </div>
+        <ul class="tabs" id="not_in_start">
             <svg class="undo-icon" viewBox="0 0 24 24" fill="none" onclick="history_cancel()" id="history_cancel" style="display: none;">
                 <path d="M7 13L4 10L7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 <path d="M4 10H15C17.7614 10 20 12.2386 20 15C20 17.7614 17.7614 20 15 20H11" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-        </div>
-        <ul class="tabs" id="not_in_start">
-            <li class="tab menu" onclick="showPage(0)" >☰</li>
             <div class="pages_nav">
-                <li class="tab active" onclick="showPage(1)" >Верхняя сетка</li>
-                <li class="tab" onclick="showPage(2)" >Нижняя сетка</li>
-                <li class="tab" onclick="showPage(3)" >Гранд-финал</li>
+                <li class="tab active" onclick="showPage(0)" >Верхняя сетка</li>
+                <li class="tab" onclick="showPage(1)" >Нижняя сетка</li>
+                <li class="tab" onclick="showPage(2)" >Гранд-финал</li>
             </div>
         </ul>
-
-        <div class="tournament-container" id="menu_page">
-            <div class = "menu_div">
-                <label class="mn-div-element" >Меню:</label>
-                <button class="btn btn-primary mn-div-element" onclick="openAccDialog()" id="acc_button"></button>
-                <button class="btn btn-secondary mn mn-div-element" onclick="openChangePasswordDialog()" id="change_password_btn">Сменить пароль</button>
-                <form action="/cleen" method="POST" id="cleen_button">
-                    <button type="submit" class="btn btn-secondary mn mn-div-element" id="cleen_button_itself">Очистить</button>
-                </form>
-            </div>
-        </div>
 
         <div class="input-section" id="add_players_page">
             <label>Введите участников турнира через запятую:</label>
@@ -81,6 +86,7 @@
         </div>
 
     </div>
+    <div class="overlay" id="overlay"></div>
     <dialog id="chooseWinner" aria-modal="true" >
         <h2 id="heading">Победитель:</h2>
         <div display = "flex">

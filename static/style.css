@@ -164,8 +164,8 @@ dialog {
     padding: 12px 18px;
     border: none;
     border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.8rem; 
+    font-weight: 600; 
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -202,12 +202,7 @@ dialog {
     box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
-.mn {
-    width: 45vw
-}
-.mn-div-element {
-    margin-bottom: 5px;
-}
+
 
 .undo-icon {
     align-self: center;
@@ -327,29 +322,145 @@ dialog {
     flex-grow: 1;
 }
 
-.menu_div{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.top-place {
+    font-size: 0.9rem;
+    text-align: start;
 }
-
-.top-div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.top-div-element {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
 .top-player {
     font-size: 1.2rem;
     font-weight: bold;
+    text-align: center;
+}
+.megal-img {
+    width: 35px;
+    margin-left: 15px;
 }
 
+.top-table {
+    margin: 2%;
+    border-collapse: separate;
+    border-spacing: 0 0;
+    width: 96%;
+    table-layout: fixed;
+}
+.top-table  td {
+    align-items: center;
+    height: 70px;
+}
+.top-table  td.small {
+    width: 20%;
+}
+.top-table  td.big {
+    width: 40%;
+}
+
+.top-table td.table-lable-td {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem
+}
+
+.menu-button {
+    position: fixed;
+    top: 30px;
+    right: 25px;
+    height: 45px;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    z-index: 3;
+    padding: 0 0;
+}
+
+.menu-button span {
+    display: block;
+    width: 50%;
+    height: 2px;
+    background-color: white;
+    margin: 2px 0;
+    transition: all 0.3s ease;
+}
+
+.menu-open .menu-button span:nth-child(1) {
+    transform-origin: center;
+    transform: translateY(6px) rotate(45deg);
+}
+
+.menu-open .menu-button span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-open .menu-button span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+
+.side-menu {
+    position: fixed;
+    top: 0;
+    right: -40%;
+    width: 40%;
+    height: 100vh;
+    background-color: #446297ff;
+    color: white;
+    z-index: 2;
+    transition: right 0.3s ease;
+    padding: 80px 20px 20px;
+    overflow-y: auto;
+}
+
+.menu-open body {
+    margin-right: 300px;
+}
+
+.menu-open .side-menu {
+    right: 0;
+}
+
+.menu-header {
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.menu-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.mn-div-element {
+    margin-bottom: 5px;
+    width: 32vw;
+    align-self: center;
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+}
+
+.menu-open .overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+ 
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
     body {
@@ -358,7 +469,17 @@ dialog {
     .header-text {
     font-size: 1.5rem;
     }
-
+    .menu-button {
+        top: 20px;
+        right: 15px;
+    }
+    .side-menu {
+        right: -60%;
+        width: 60%;
+    }
+    .mn-div-element {
+        width: 48vw;
+    }
     .icon-img {
         flex-grow: 0;
         height: 75%;
@@ -402,6 +523,15 @@ dialog {
 
     .player-name {
         font-size: 0.8rem;
+    }
+    .top-table  td.small {
+        width: 30%;
+    }
+    .top-table  td.big {
+        width: 35%;
+    }
+    .top-player {
+    font-size: 1.1rem;
     }
 
 }
